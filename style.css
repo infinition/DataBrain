@@ -1,0 +1,61 @@
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #0f1117;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+}
+
+/* Utilities */
+.backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.preserve-3d {
+    transform-style: preserve-3d;
+}
+
+.rotate-y-180 {
+    transform: rotateY(180deg);
+}
+
+.perspective-1000 {
+    perspective: 1000px;
+}
+
+/* Drag & Drop Feedback */
+.drag-over-top {
+    border-top: 2px solid #6366f1 !important;
+    /* Indigo-500 */
+}
+
+.drag-over-bottom {
+    border-bottom: 2px solid #6366f1 !important;
+}
+
+.drag-over-inside {
+    background-color: rgba(99, 102, 241, 0.1) !important;
+    border: 1px dashed #6366f1 !important;
+}
+
+/* Hide Scrollbar Utility */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
