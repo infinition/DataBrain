@@ -2,6 +2,14 @@
 
 function renderSidebar() {
     sidebarContent.innerHTML = '';
+
+    // Mobile-only Add Formation Button (at the top)
+    const mobileAddBtn = document.createElement('button');
+    mobileAddBtn.className = 'md:hidden w-full mb-4 flex items-center justify-center gap-2 p-2 rounded-lg border border-dashed border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors text-xs font-medium';
+    mobileAddBtn.innerHTML = `<i data-lucide="plus" class="w-4 h-4"></i> Ajouter une formation`;
+    mobileAddBtn.onclick = addFormation;
+    sidebarContent.appendChild(mobileAddBtn);
+
     formations.forEach(formation => {
         const formationDiv = document.createElement('div');
         formationDiv.className = 'mb-6 border-b border-slate-800 pb-4';
