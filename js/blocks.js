@@ -15,7 +15,17 @@ if (typeof marked !== 'undefined') {
 
 function renderBlocks(blocks) {
     learnView.innerHTML = '';
-    blocks.forEach(block => {
+
+    // Helper to insert zone
+    const addZone = (index) => {
+        if (editMode) {
+            learnView.appendChild(renderInsertionZone(index));
+        }
+    };
+
+    blocks.forEach((block, index) => {
+        addZone(index);
+
         const blockWrapper = document.createElement('div');
         blockWrapper.className = 'group relative transition-all duration-200';
         blockWrapper.dataset.id = block.id;
@@ -107,7 +117,66 @@ function renderBlocks(blocks) {
         blockWrapper.appendChild(contentDiv);
         learnView.appendChild(blockWrapper);
     });
+
+    // Add final zone
+    addZone(blocks.length);
+
     lucide.createIcons();
+}
+
+function renderInsertionZone(index) {
+    const container = document.createElement('div');
+    container.className = 'h-4 -my-2 relative z-10 group/zone flex items-center justify-center cursor-pointer transition-all hover:h-12';
+
+    // Invisible hit area that becomes visible on hover
+    const line = document.createElement('div');
+    line.className = 'w-full h-0.5 bg-indigo-500/0 group-hover/zone:bg-indigo-500/50 transition-colors rounded-full relative flex items-center justify-center';
+
+    const plusBtn = document.createElement('div');
+    plusBtn.className = 'w-6 h-6 bg-indigo-600 rounded-full text-white flex items-center justify-center opacity-0 group-hover/zone:opacity-100 transition-all transform scale-0 group-hover/zone:scale-100 shadow-lg';
+    plusBtn.innerHTML = '<i data-lucide="plus" class="w-4 h-4"></i>';
+
+    line.appendChild(plusBtn);
+    container.appendChild(line);
+
+    container.onclick = (e) => {
+        e.stopPropagation();
+        // Replace zone with panel
+        const panel = renderAddBlockPanel(index);
+        container.replaceWith(panel);
+        lucide.createIcons();
+    };
+
+    return container;
+}
+
+function renderAddBlockPanel(index) {
+    const div = document.createElement('div');
+    div.className = 'my-4 border-2 border-dashed border-indigo-500/30 rounded-xl p-6 bg-slate-900/40 text-center animate-in fade-in zoom-in duration-200';
+    div.innerHTML = `
+        <div class="mb-4 text-sm text-slate-400 font-medium">Ajouter un bloc ou glisser un fichier</div>
+        <div class="flex justify-center gap-3 flex-wrap">
+            <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="text" title="Texte"><i data-lucide="type" class="w-5 h-5"></i></button>
+            <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="code" title="Code"><i data-lucide="terminal" class="w-5 h-5"></i></button>
+            <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="video" title="Vidéo"><i data-lucide="video" class="w-5 h-5"></i></button>
+            <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="image" title="Image"><i data-lucide="image" class="w-5 h-5"></i></button>
+            <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="quiz" title="Quiz"><i data-lucide="brain" class="w-5 h-5"></i></button>
+            <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="flashcard" title="Flashcards"><i data-lucide="layers" class="w-5 h-5"></i></button>
+        </div>
+        <button class="cancel-btn mt-4 text-xs text-slate-500 hover:text-red-400 underline">Annuler</button>
+    `;
+
+    div.querySelectorAll('.add-btn').forEach(btn => {
+        btn.onclick = () => addBlock(btn.dataset.type, null, index);
+    });
+
+    div.querySelector('.cancel-btn').onclick = () => {
+        // Revert to zone
+        div.replaceWith(renderInsertionZone(index));
+        lucide.createIcons();
+    };
+
+    return div;
 }
 
 function reorderBlocks(draggedId, targetId, position) {
@@ -749,7 +818,7 @@ function updateBlock(blockId, newContent, skipRender = false) {
     if (!skipRender) renderContent();
 }
 
-function addBlock(type, content) {
+function addBlock(type, content, index = -1) {
     const activeData = findActiveData();
     if (!activeData) return;
 
@@ -766,7 +835,12 @@ function addBlock(type, content) {
         type,
         content: content || defaultContent
     };
-    activeData.sub.blocks.push(newBlock);
+
+    if (index === -1) {
+        activeData.sub.blocks.push(newBlock);
+    } else {
+        activeData.sub.blocks.splice(index, 0, newBlock);
+    }
     renderContent();
 }
 
