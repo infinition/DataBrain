@@ -59,3 +59,24 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
+/* Prose Overrides for Tighter Spacing */
+.prose img {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    display: inline-block !important;
+    /* Allow side-by-side if space permits */
+}
+
+.prose p {
+    margin-top: 0.5em !important;
+    margin-bottom: 0.5em !important;
+}
+
+.prose> :first-child {
+    margin-top: 0 !important;
+}
+
+.prose> :last-child {
+    margin-bottom: 0 !important;
+}

@@ -89,7 +89,10 @@ function setupEventListeners() {
     mainContainer.ondragenter = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (editMode) {
+
+        const isFile = e.dataTransfer.types && Array.from(e.dataTransfer.types).includes('Files');
+
+        if (editMode && isFile) {
             dragActive = true;
             dragOverlay.classList.remove('hidden');
             dragOverlay.classList.remove('pointer-events-none');
