@@ -162,18 +162,27 @@ function renderSubChaptersRecursive(subChapters, container, formId, modId, chapI
         subItemWrapper.dataset.id = sub.id;
         subItemWrapper.dataset.type = 'sub';
 
+        const isActive = activeSubId === sub.id;
         const subItem = document.createElement('div');
-        subItem.className = `flex items-center justify-between px-2 py-1.5 rounded text-xs cursor-pointer transition-colors group ${activeSubId === sub.id ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300'}`;
+        subItem.className = `flex items-center justify-between px-2 py-1.5 rounded text-xs cursor-pointer transition-colors group ${isActive ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300'}`;
 
         // Icon based on type (default to folder if undefined for backward compatibility, or check subChapters length)
         const isFolder = sub.type === 'folder' || (sub.subChapters && sub.subChapters.length > 0) || !sub.type;
 
         let iconName = isFolder ? (sub.isOpen ? 'folder-open' : 'folder') : 'file-text';
-        let iconHtml = `<i data-lucide="${iconName}" class="w-3 h-3 ${sub.isCompleted ? 'text-green-400' : 'text-slate-500'}"></i>`;
+
+        let iconColorClass = 'text-slate-500';
+        if (isActive) {
+            iconColorClass = 'text-white';
+        } else if (sub.isCompleted) {
+            iconColorClass = 'text-green-400';
+        }
+
+        let iconHtml = `<i data-lucide="${iconName}" class="w-3 h-3 ${iconColorClass}"></i>`;
 
         if (sub.icon) {
             if (sub.icon.length > 2) {
-                iconHtml = `<i data-lucide="${sub.icon}" class="w-3 h-3 ${sub.isCompleted ? 'text-green-400' : 'text-slate-500'}"></i>`;
+                iconHtml = `<i data-lucide="${sub.icon}" class="w-3 h-3 ${iconColorClass}"></i>`;
             } else {
                 iconHtml = `<span class="text-xs w-3 text-center inline-block">${sub.icon}</span>`;
             }
@@ -207,7 +216,7 @@ function renderSubChaptersRecursive(subChapters, container, formId, modId, chapI
         const actionsSpan = document.createElement('div');
         actionsSpan.className = 'flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 flex-shrink-0 ml-2';
 
-        const isActive = activeSubId === sub.id;
+
         const btnBaseClass = isActive ? 'text-indigo-200' : 'text-slate-500';
         const btnHoverPalette = isActive ? 'hover:text-white' : 'hover:text-pink-400';
         const btnHoverAdd = isActive ? 'hover:text-white' : 'hover:text-indigo-400';
