@@ -69,20 +69,26 @@ function renderBlocks(blocks) {
             });
 
             const controls = document.createElement('div');
-            controls.className = 'absolute -left-10 top-0 flex flex-col gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity';
+            // Mobile: Overlay top, always visible. Desktop: Left side, visible on hover.
+            controls.className = 'absolute top-0 left-0 right-0 h-full z-20 pointer-events-none opacity-100 md:opacity-0 md:group-hover:opacity-100 md:-left-10 md:right-auto md:w-10 transition-opacity';
+
+            const stickyControls = document.createElement('div');
+            // Mobile: Horizontal spread. Desktop: Vertical stack.
+            stickyControls.className = 'sticky top-0 flex justify-between p-2 w-full pointer-events-none md:flex-col md:w-auto md:p-0 md:gap-1';
+            controls.appendChild(stickyControls);
 
             // Drag Handle
             const dragHandle = document.createElement('div');
-            dragHandle.className = 'p-1.5 bg-slate-800 text-slate-400 cursor-grab active:cursor-grabbing rounded border border-slate-700 flex items-center justify-center';
+            dragHandle.className = 'p-1.5 bg-slate-800/90 text-slate-400 cursor-grab active:cursor-grabbing rounded-lg border border-slate-700 flex items-center justify-center shadow-sm backdrop-blur-sm pointer-events-auto';
             dragHandle.innerHTML = `<i data-lucide="grip-vertical" class="w-3.5 h-3.5"></i>`;
-            controls.appendChild(dragHandle);
+            stickyControls.appendChild(dragHandle);
 
             // Delete Button
             const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'p-1.5 bg-slate-800 text-red-500 hover:bg-red-900/50 rounded border border-slate-700';
+            deleteBtn.className = 'p-1.5 bg-slate-800/90 text-red-500 hover:bg-red-900/50 rounded-lg border border-slate-700 shadow-sm backdrop-blur-sm pointer-events-auto';
             deleteBtn.innerHTML = `<i data-lucide="trash-2" class="w-3.5 h-3.5"></i>`;
             deleteBtn.onclick = () => deleteBlock(block.id);
-            controls.appendChild(deleteBtn);
+            stickyControls.appendChild(deleteBtn);
 
             blockWrapper.appendChild(controls);
         }
