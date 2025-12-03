@@ -679,35 +679,96 @@ function renderCodeBlock(block) {
 function renderCodeBlock(block) {
     const div = document.createElement('div');
     div.className = 'border border-slate-700 rounded-lg overflow-hidden bg-[#1e1e1e] my-4 shadow-lg group';
+
+    let codeContent = block.content;
+    let language = 'python'; // Default
+
+    if (typeof block.content === 'object' && block.content !== null) {
+        codeContent = block.content.code || '';
+        language = block.content.language || 'python';
+    }
+
     const header = document.createElement('div');
     header.className = 'flex items-center justify-between px-4 py-2 bg-[#2d2d2d] border-b border-slate-700';
     header.innerHTML = `
         <div class="flex items-center gap-2">
             <span class="text-xs text-orange-400 font-mono">In [ ]:</span>
-            <span class="text-xs text-slate-400">Python 3.10</span>
+            <span class="text-xs text-slate-400 uppercase">${language}</span>
         </div>
-        <button class="run-code-btn flex items-center gap-1 text-xs bg-green-700 hover:bg-green-600 text-white px-3 py-1 rounded transition-colors">
-            <i data-lucide="play" class="w-3 h-3"></i> Run
-        </button>
+        <div class="flex items-center gap-2">
+            <button class="copy-code-btn flex items-center gap-1 text-slate-400 hover:text-white p-1 rounded transition-colors" title="Copier le code">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            </button>
+            <button class="run-code-btn flex items-center gap-1 text-xs bg-green-700 hover:bg-green-600 text-white px-3 py-1 rounded transition-colors">
+                <i data-lucide="play" class="w-3 h-3"></i> Run
+            </button>
+        </div>
     `;
     const body = document.createElement('div');
     body.className = 'relative';
     if (editMode) {
         const textarea = document.createElement('textarea');
         textarea.className = 'w-full h-48 bg-[#1e1e1e] text-slate-300 p-4 font-mono text-sm outline-none resize-none border-b border-slate-700 focus:border-indigo-500';
-        textarea.value = block.content;
+        textarea.value = codeContent;
         textarea.spellcheck = false;
-        textarea.oninput = (e) => updateBlock(block.id, e.target.value);
+        textarea.oninput = (e) => {
+            const newContent = typeof block.content === 'object' ? { ...block.content, code: e.target.value } : e.target.value;
+            updateBlock(block.id, newContent);
+        };
         body.appendChild(textarea);
     } else {
         const pre = document.createElement('div');
-        pre.className = 'p-4 font-mono text-sm text-gray-300 overflow-x-auto';
-        pre.innerHTML = `<pre>${block.content}</pre>`;
+        pre.className = 'p-4 font-mono text-sm text-gray-300 overflow-x-auto relative transition-all duration-300 ease-in-out custom-scrollbar';
+
+        // Limit height by default (approx 20 lines)
+        pre.style.maxHeight = '400px';
+        pre.style.overflowY = 'hidden';
+
+        // Use highlight.js if available
+        if (window.hljs) {
+            const highlighted = hljs.highlight(codeContent, { language: language, ignoreIllegals: true }).value;
+            pre.innerHTML = `<pre><code class="hljs language-${language}" style="white-space: pre;">${highlighted}</code></pre>`;
+        } else {
+            pre.innerHTML = `<pre style="white-space: pre;">${codeContent}</pre>`;
+        }
         body.appendChild(pre);
+
+        // Check if content is long enough to need a "Show More" button
+        const lineCount = codeContent.split('\n').length;
+        if (lineCount > 20) {
+            const expandBtnContainer = document.createElement('div');
+            expandBtnContainer.className = 'absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#1e1e1e] to-transparent flex items-end justify-center pb-2';
+            expandBtnContainer.innerHTML = `
+                <button class="flex items-center gap-2 px-4 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-full shadow-lg transition-all">
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i> Voir tout le code
+                </button>
+            `;
+            expandBtnContainer.querySelector('button').onclick = () => {
+                pre.style.maxHeight = 'none';
+                expandBtnContainer.remove();
+            };
+            body.appendChild(expandBtnContainer);
+        } else {
+            pre.style.maxHeight = 'none';
+        }
     }
     const outputDiv = document.createElement('div');
     outputDiv.className = 'hidden bg-[#252526] border-t border-slate-700 p-4 font-mono text-sm';
     outputDiv.innerHTML = `<span class="text-xs text-red-400 block mb-2">Out [1]:</span><pre class="text-white">Process finished with exit code 0\n> Execution successful.</pre>`;
+
+    // Copy Button Logic
+    header.querySelector('.copy-code-btn').onclick = () => {
+        navigator.clipboard.writeText(codeContent).then(() => {
+            const btn = header.querySelector('.copy-code-btn');
+            btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-green-400"></i>`;
+            lucide.createIcons();
+            setTimeout(() => {
+                btn.innerHTML = `<i data-lucide="copy" class="w-3.5 h-3.5"></i>`;
+                lucide.createIcons();
+            }, 2000);
+        });
+    };
+
     header.querySelector('.run-code-btn').onclick = () => {
         const btn = header.querySelector('.run-code-btn');
         btn.innerHTML = `<i data-lucide="cpu" class="w-3 h-3 animate-spin"></i> Run`;

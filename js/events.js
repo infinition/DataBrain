@@ -233,10 +233,26 @@ function handleFiles(files) {
                 }
             };
             reader.readAsText(file);
+        } else if (file.name.endsWith('.md')) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                addBlock('text', ev.target.result);
+            };
+            reader.readAsText(file);
         } else {
             const reader = new FileReader();
             reader.onload = (ev) => {
-                addBlock('code', ev.target.result);
+                let language = 'python';
+                if (file.name.endsWith('.js')) language = 'javascript';
+                else if (file.name.endsWith('.css')) language = 'css';
+                else if (file.name.endsWith('.html')) language = 'html';
+                else if (file.name.endsWith('.java')) language = 'java';
+                else if (file.name.endsWith('.cpp') || file.name.endsWith('.c')) language = 'cpp';
+                else if (file.name.endsWith('.sql')) language = 'sql';
+                else if (file.name.endsWith('.json')) language = 'json';
+                else if (file.name.endsWith('.sh')) language = 'bash';
+
+                addBlock('code', { code: ev.target.result, language: language });
             };
             reader.readAsText(file);
         }
