@@ -21,10 +21,10 @@ function renderSidebar() {
             </div>
             <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 flex-shrink-0 ml-2">
                 <button class="text-slate-500 hover:text-pink-400 customize-btn" data-type="formation" data-id="${formation.id}" title="Personnaliser">
-                    <i data-lucide="palette" class="w-3.5 h-3.5"></i>
+                    <i data-lucide="palette" class="w-4 h-4"></i>
                 </button>
                 <button class="text-slate-500 hover:text-green-400 add-module-btn" data-id="${formation.id}" title="Ajouter Module">
-                    <i data-lucide="folder-plus" class="w-3.5 h-3.5"></i>
+                    <i data-lucide="folder-plus" class="w-4 h-4"></i>
                 </button>
             </div>
         `;
@@ -61,10 +61,10 @@ function renderSidebar() {
                     </div>
                     <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 flex-shrink-0 ml-2">
                         <button class="text-slate-500 hover:text-pink-400 customize-btn" data-type="module" data-form-id="${formation.id}" data-id="${module.id}" title="Personnaliser">
-                            <i data-lucide="palette" class="w-3 h-3"></i>
+                            <i data-lucide="palette" class="w-4 h-4"></i>
                         </button>
                         <button class="text-slate-500 hover:text-green-400 add-chapter-btn" data-form-id="${formation.id}" data-id="${module.id}" title="Ajouter Chapitre">
-                            <i data-lucide="folder-plus" class="w-3 h-3"></i>
+                            <i data-lucide="folder-plus" class="w-4 h-4"></i>
                         </button>
                     </div>
                 `;
@@ -99,13 +99,13 @@ function renderSidebar() {
                             </div>
                             <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 flex-shrink-0 ml-2">
                                 <button class="text-slate-500 hover:text-pink-400 customize-btn" data-type="chapter" data-form-id="${formation.id}" data-mod-id="${module.id}" data-id="${chapter.id}" title="Personnaliser">
-                                    <i data-lucide="palette" class="w-3 h-3"></i>
+                                    <i data-lucide="palette" class="w-4 h-4"></i>
                                 </button>
                                 <button class="text-slate-500 hover:text-indigo-400 add-sub-btn" data-type="folder" data-form-id="${formation.id}" data-mod-id="${module.id}" data-chap-id="${chapter.id}" title="Ajouter Sous-chapitre (Dossier)">
-                                    <i data-lucide="folder-plus" class="w-3 h-3"></i>
+                                    <i data-lucide="folder-plus" class="w-4 h-4"></i>
                                 </button>
                                 <button class="text-slate-500 hover:text-indigo-400 add-sub-btn" data-type="page" data-form-id="${formation.id}" data-mod-id="${module.id}" data-chap-id="${chapter.id}" title="Ajouter Page">
-                                    <i data-lucide="file-plus" class="w-3 h-3"></i>
+                                    <i data-lucide="file-plus" class="w-4 h-4"></i>
                                 </button>
                             </div>
                         `;
@@ -188,20 +188,25 @@ function renderSubChaptersRecursive(subChapters, container, formId, modId, chapI
         const actionsSpan = document.createElement('div');
         actionsSpan.className = 'flex items-center gap-1 opacity-0 group-hover:opacity-100 flex-shrink-0 ml-2';
 
+        const isActive = activeSubId === sub.id;
+        const btnBaseClass = isActive ? 'text-indigo-200' : 'text-slate-500';
+        const btnHoverPalette = isActive ? 'hover:text-white' : 'hover:text-pink-400';
+        const btnHoverAdd = isActive ? 'hover:text-white' : 'hover:text-indigo-400';
+
         actionsSpan.innerHTML = `
-            <button class="text-slate-500 hover:text-pink-400 customize-btn" data-type="sub" data-id="${sub.id}" title="Personnaliser">
-                <i data-lucide="palette" class="w-3 h-3"></i>
+            <button class="${btnBaseClass} ${btnHoverPalette} customize-btn" data-type="sub" data-id="${sub.id}" title="Personnaliser">
+                <i data-lucide="palette" class="w-4 h-4"></i>
             </button>
         `;
 
         // Only show add buttons if it's a folder
         if (isFolder) {
             actionsSpan.innerHTML += `
-                <button class="text-slate-500 hover:text-indigo-400 add-nested-btn" data-type="folder" data-id="${sub.id}" title="Ajouter sous-chapitre imbriqué">
-                    <i data-lucide="folder-plus" class="w-3 h-3"></i>
+                <button class="${btnBaseClass} ${btnHoverAdd} add-nested-btn" data-type="folder" data-id="${sub.id}" title="Ajouter sous-chapitre imbriqué">
+                    <i data-lucide="folder-plus" class="w-4 h-4"></i>
                 </button>
-                <button class="text-slate-500 hover:text-indigo-400 add-nested-btn" data-type="page" data-id="${sub.id}" title="Ajouter page imbriquée">
-                    <i data-lucide="file-plus" class="w-3 h-3"></i>
+                <button class="${btnBaseClass} ${btnHoverAdd} add-nested-btn" data-type="page" data-id="${sub.id}" title="Ajouter page imbriquée">
+                    <i data-lucide="file-plus" class="w-4 h-4"></i>
                 </button>
             `;
         }
