@@ -14,12 +14,23 @@ function renderSidebar() {
         // Formation Header
         const formHeader = document.createElement('div');
         formHeader.className = 'flex items-center justify-between px-2 py-1 text-indigo-400 hover:text-indigo-300 group mb-2';
+
+        // Icon Logic
+        let iconHtml = `<i data-lucide="${formation.isOpen ? 'chevron-down' : 'chevron-right'}" class="w-4 h-4 flex-shrink-0"></i>`;
+        if (formation.icon) {
+            if (formation.icon.length > 2) { // Lucide icon name
+                iconHtml += `<i data-lucide="${formation.icon}" class="w-4 h-4 ml-2"></i>`;
+            } else { // Emoji
+                iconHtml += `<span class="ml-2 text-sm">${formation.icon}</span>`;
+            }
+        }
+
         formHeader.innerHTML = `
             <div class="flex items-center gap-2 cursor-pointer formation-toggle flex-1 min-w-0" data-id="${formation.id}">
-                <i data-lucide="${formation.isOpen ? 'chevron-down' : 'chevron-right'}" class="w-4 h-4 flex-shrink-0"></i>
+                ${iconHtml}
                 <span class="text-sm font-bold uppercase tracking-wider break-words" style="${formation.color ? `color: ${formation.color}` : ''}">${formation.title}</span>
             </div>
-            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 flex-shrink-0 ml-2">
+            <div class="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 flex-shrink-0 ml-2">
                 <button class="text-slate-500 hover:text-pink-400 customize-btn" data-type="formation" data-id="${formation.id}" title="Personnaliser">
                     <i data-lucide="palette" class="w-4 h-4"></i>
                 </button>
@@ -59,7 +70,7 @@ function renderSidebar() {
                         ${iconHtml}
                         <span class="text-xs font-semibold break-words" style="${module.color ? `color: ${module.color}` : ''}">${module.title}</span>
                     </div>
-                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 flex-shrink-0 ml-2">
+                    <div class="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 flex-shrink-0 ml-2">
                         <button class="text-slate-500 hover:text-pink-400 customize-btn" data-type="module" data-form-id="${formation.id}" data-id="${module.id}" title="Personnaliser">
                             <i data-lucide="palette" class="w-4 h-4"></i>
                         </button>
@@ -97,7 +108,7 @@ function renderSidebar() {
                             <div class="flex items-center gap-2 cursor-pointer chapter-toggle flex-1 min-w-0" data-form-id="${formation.id}" data-mod-id="${module.id}" data-id="${chapter.id}">
                                 ${chapIconHtml} <span class="break-words" style="${chapter.color ? `color: ${chapter.color}` : ''}">${chapter.title}</span>
                             </div>
-                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 flex-shrink-0 ml-2">
+                            <div class="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 flex-shrink-0 ml-2">
                                 <button class="text-slate-500 hover:text-pink-400 customize-btn" data-type="chapter" data-form-id="${formation.id}" data-mod-id="${module.id}" data-id="${chapter.id}" title="Personnaliser">
                                     <i data-lucide="palette" class="w-4 h-4"></i>
                                 </button>
@@ -186,7 +197,7 @@ function renderSubChaptersRecursive(subChapters, container, formId, modId, chapI
 
         // Actions part of the row
         const actionsSpan = document.createElement('div');
-        actionsSpan.className = 'flex items-center gap-1 opacity-0 group-hover:opacity-100 flex-shrink-0 ml-2';
+        actionsSpan.className = 'flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 flex-shrink-0 ml-2';
 
         const isActive = activeSubId === sub.id;
         const btnBaseClass = isActive ? 'text-indigo-200' : 'text-slate-500';
