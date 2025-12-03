@@ -80,3 +80,380 @@
 .prose> :last-child {
     margin-bottom: 0 !important;
 }
+
+/* --- INTERACTIVE MODULES (Ported from Infinition) --- */
+:root {
+    --neon-orange: #FF6B00;
+    --neon-green: #0aff47;
+    --neon-blue: #13aff0;
+    --neon-purple: #bd00ff;
+    --neon-red: #ff003c;
+    --ui-font: 'Inter', sans-serif;
+}
+
+/* --- MODALS & OVERLAY --- */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 3000;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.modal-content {
+    width: 100%;
+    height: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* --- FLASHCARDS UI --- */
+.fc-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    font-family: var(--ui-font);
+}
+
+.fc-top-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.fc-counter-badge {
+    background: #2c2c2e;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.fc-progress-bg {
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.fc-progress-fill {
+    height: 100%;
+    background: var(--neon-orange);
+    width: 30%;
+    border-radius: 2px;
+    transition: width 0.3s;
+}
+
+.fc-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 20px;
+}
+
+.fc-scene {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3/4;
+    perspective: 1000px;
+    margin-bottom: auto;
+}
+
+.fc-stack-1 {
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    right: 10px;
+    bottom: 20px;
+    background: #222;
+    border-radius: 20px;
+    z-index: 1;
+    opacity: 0.6;
+    transform: scale(0.95);
+}
+
+.fc-stack-2 {
+    position: absolute;
+    top: -20px;
+    left: 20px;
+    right: 20px;
+    bottom: 40px;
+    background: #111;
+    border-radius: 20px;
+    z-index: 0;
+    opacity: 0.4;
+    transform: scale(0.9);
+}
+
+.fc-card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 10;
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+.fc-card.flipped {
+    transform: rotateY(180deg);
+}
+
+.fc-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    background: #1c1c1e;
+    border-radius: 20px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.fc-back {
+    transform: rotateY(180deg);
+    background: #252527;
+}
+
+.fc-q-badge {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.fc-q-icon {
+    background: rgba(255, 159, 10, 0.2);
+    color: var(--neon-orange);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.fc-text {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: white;
+    line-height: 1.4;
+}
+
+.fc-tap-hint {
+    position: absolute;
+    bottom: 25px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #aaa;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.fc-controls {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding: 30px 0;
+    margin-top: auto;
+}
+
+.fc-action-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.fc-btn-no {
+    background: rgba(255, 69, 58, 0.15);
+    color: var(--neon-red);
+}
+
+.fc-btn-yes {
+    background: rgba(48, 209, 88, 0.15);
+    color: var(--neon-green);
+}
+
+.fc-action-btn:active {
+    transform: scale(0.9);
+    filter: brightness(1.2);
+}
+
+/* --- QUIZ UI --- */
+.qz-container {
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    font-family: var(--ui-font);
+}
+
+.qz-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.qz-progress-bg {
+    height: 6px;
+    background: #222;
+    border-radius: 3px;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.qz-progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #bf5af2, #0a84ff);
+    width: 50%;
+    border-radius: 3px;
+    transition: width 0.3s;
+}
+
+.qz-question-box {
+    background: #1c1c1e;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #333;
+}
+
+.qz-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #0a84ff;
+    font-weight: 700;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.qz-label i {
+    background: rgba(10, 132, 255, 0.2);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.qz-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.qz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.qz-option {
+    background: #2c2c2e;
+    padding: 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: 0.2s;
+}
+
+.qz-option:active {
+    background: #3a3a3c;
+}
+
+.qz-letter {
+    background: #3a3a3c;
+    color: #ccc;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.qz-option.correct {
+    background: rgba(48, 209, 88, 0.15);
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+}
+
+.qz-option.wrong {
+    background: rgba(255, 69, 58, 0.15);
+    border-color: var(--neon-red);
+    color: var(--neon-red);
+}
+
+.action-btn {
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    font-family: var(--ui-font);
+    font-size: 0.9rem;
+}
+
+.btn-flash {
+    background: var(--neon-orange);
+    color: black;
+}

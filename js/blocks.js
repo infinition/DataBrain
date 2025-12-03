@@ -498,6 +498,201 @@ function renderCodeBlock(block) {
     const body = document.createElement('div');
     body.className = 'relative';
     if (editMode) {
+        const renderChunk = (chunkIndex, focus = false) => {
+            const chunk = chunks[chunkIndex];
+            const chunkContent = chunk.lines.join('\n');
+            const chunkDiv = document.createElement('div');
+
+            chunkDiv.dataset.chunkIndex = chunkIndex;
+
+            if (chunk.type === 'empty') {
+                chunkDiv.className = 'min-h-[1em]';
+                chunkDiv.innerHTML = '<br>';
+            } else {
+                chunkDiv.className = 'min-h-[1.5em] relative group/chunk';
+            }
+
+            // Edit Mode (Textarea)
+            const createInput = () => {
+                const input = document.createElement('textarea');
+                input.className = 'w-full bg-transparent text-slate-300 outline-none font-mono text-sm resize-none overflow-hidden block';
+                input.value = chunkContent;
+                input.rows = Math.max(1, chunk.lines.length);
+
+                // Prevent drag/click propagation
+                input.onmousedown = (e) => e.stopPropagation();
+                input.onclick = (e) => e.stopPropagation();
+                input.ondblclick = (e) => e.stopPropagation();
+
+                const adjustHeight = () => {
+                    input.style.height = 'auto';
+                    input.style.height = input.scrollHeight + 'px';
+                };
+
+                input.onfocus = () => {
+                    lastActiveTextarea = input;
+                    const wrapper = div.closest('.group');
+                    if (wrapper) wrapper.setAttribute('draggable', 'false');
+                };
+
+                let isUpdating = false;
+
+                // Save & Preview on Blur
+                input.onblur = () => {
+                    if (isUpdating) return;
+                    isUpdating = true;
+
+                    setTimeout(() => {
+                        const activeEl = document.activeElement;
+                        const isToolbar = activeEl && div.contains(activeEl) && activeEl.tagName === 'BUTTON';
+                        const isAnotherChunk = activeEl && div.contains(activeEl) && activeEl.tagName === 'TEXTAREA';
+
+                        if (isToolbar) {
+                            isUpdating = false;
+                            return;
+                        }
+
+                        if (document.activeElement !== input) {
+                            // Ensure the node is still in the DOM before trying to replace it
+                            if (!chunkDiv.parentNode) {
+                                isUpdating = false;
+                                return;
+                            }
+
+                            const newLines = input.value.split('\n');
+                            chunks[chunkIndex].lines = newLines;
+
+                            const allLines = chunks.flatMap(c => c.lines);
+                            updateBlock(block.id, allLines.join('\n'), true);
+
+                            const hasNewBlanks = newLines.some(l => l.trim() === '');
+                            if (hasNewBlanks) {
+                                renderContent();
+                            } else {
+                                const newChunkDiv = renderChunk(chunkIndex);
+                                if (chunkDiv.parentNode === container) {
+                                    container.replaceChild(newChunkDiv, chunkDiv);
+                                }
+                            }
+
+                            if (!isAnotherChunk) {
+                                const wrapper = div.closest('.group');
+                                if (wrapper) wrapper.setAttribute('draggable', 'true');
+                            }
+                        }
+                        isUpdating = false;
+                    }, 150);
+                };
+
+                input.oninput = () => adjustHeight();
+                setTimeout(adjustHeight, 0);
+                return input;
+            };
+
+            // Preview Mode (HTML)
+            const createPreview = () => {
+                const preview = document.createElement('div');
+                preview.className = 'prose prose-invert prose-indigo max-w-none text-slate-300 leading-relaxed cursor-text [&>*]:my-0';
+
+                if (chunk.type === 'empty') {
+                    preview.innerHTML = '<br>';
+                } else {
+                    try {
+                        preview.innerHTML = marked.parse(chunkContent);
+                        preview.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                            anchor.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                const targetId = this.getAttribute('href').substring(1);
+                                const targetElement = document.getElementById(targetId);
+                                if (targetElement) {
+                                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                                }
+                            });
+                        });
+                    } catch (e) {
+                        preview.textContent = chunkContent;
+                    }
+                }
+                return preview;
+            };
+
+            if (focus) {
+                const input = createInput();
+                chunkDiv.appendChild(input);
+                setTimeout(() => input.focus(), 0);
+            } else {
+                const preview = createPreview();
+                chunkDiv.appendChild(preview);
+
+                chunkDiv.onclick = (e) => {
+                    e.stopPropagation();
+                    chunkDiv.innerHTML = '';
+                    const input = createInput();
+                    chunkDiv.appendChild(input);
+                    input.focus();
+                };
+            }
+
+            return chunkDiv;
+        };
+
+        chunks.forEach((_, i) => {
+            container.appendChild(renderChunk(i));
+        });
+
+        div.onclick = (e) => {
+            if (e.target === div || e.target === container) {
+                chunks.push({ lines: [""], type: 'empty' });
+                const newChunkIndex = chunks.length - 1;
+
+                const allLines = chunks.flatMap(c => c.lines);
+                updateBlock(block.id, allLines.join('\n'), true);
+
+                const newChunk = renderChunk(newChunkIndex, true);
+                container.appendChild(newChunk);
+            }
+        };
+
+        div.appendChild(container);
+    } else {
+        div.className = 'prose prose-invert prose-indigo max-w-none text-slate-300 leading-relaxed';
+        try {
+            div.innerHTML = marked.parse(block.content, { breaks: true });
+            div.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        } catch (e) {
+            div.textContent = block.content;
+            console.error("Markdown parsing error:", e);
+        }
+    }
+    return div;
+}
+
+function renderCodeBlock(block) {
+    const div = document.createElement('div');
+    div.className = 'border border-slate-700 rounded-lg overflow-hidden bg-[#1e1e1e] my-4 shadow-lg group';
+    const header = document.createElement('div');
+    header.className = 'flex items-center justify-between px-4 py-2 bg-[#2d2d2d] border-b border-slate-700';
+    header.innerHTML = `
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-orange-400 font-mono">In [ ]:</span>
+            <span class="text-xs text-slate-400">Python 3.10</span>
+        </div>
+        <button class="run-code-btn flex items-center gap-1 text-xs bg-green-700 hover:bg-green-600 text-white px-3 py-1 rounded transition-colors">
+            <i data-lucide="play" class="w-3 h-3"></i> Run
+        </button>
+    `;
+    const body = document.createElement('div');
+    body.className = 'relative';
+    if (editMode) {
         const textarea = document.createElement('textarea');
         textarea.className = 'w-full h-48 bg-[#1e1e1e] text-slate-300 p-4 font-mono text-sm outline-none resize-none border-b border-slate-700 focus:border-indigo-500';
         textarea.value = block.content;
@@ -638,7 +833,10 @@ function renderQuizBlock(block) {
             qDiv.innerHTML = `
                 <input type="text" class="q-input w-full bg-transparent border-b border-slate-700 mb-2 text-sm text-white focus:outline-none" value="${q.question}">
                 <div class="space-y-1 options-container"></div>
-                <button class="del-q-btn text-[10px] text-red-400 mt-2 hover:underline">Supprimer question</button>
+                <div class="flex justify-between items-center mt-2">
+                    <button class="add-opt-btn text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1"><i data-lucide="plus" class="w-3 h-3"></i> Ajouter option</button>
+                    <button class="del-q-btn text-[10px] text-red-400 hover:underline">Supprimer question</button>
+                </div>
             `;
             qDiv.querySelector('.q-input').oninput = (e) => { questions[qIdx].question = e.target.value; updateBlock(block.id, { questions }); };
             const optsContainer = qDiv.querySelector('.options-container');
@@ -648,54 +846,49 @@ function renderQuizBlock(block) {
                 optDiv.innerHTML = `
                     <div class="w-3 h-3 rounded-full border cursor-pointer ${q.correct === oIdx ? 'bg-green-500 border-green-500' : 'border-slate-500'}"></div>
                     <input type="text" class="opt-input flex-1 bg-transparent text-xs text-slate-400 border-none focus:outline-none" value="${opt}">
+                    <button class="del-opt-btn text-slate-600 hover:text-red-400"><i data-lucide="x" class="w-3 h-3"></i></button>
                 `;
                 optDiv.querySelector('div').onclick = () => { questions[qIdx].correct = oIdx; updateBlock(block.id, { questions }); renderContent(); };
                 optDiv.querySelector('.opt-input').oninput = (e) => { questions[qIdx].options[oIdx] = e.target.value; updateBlock(block.id, { questions }); };
+                optDiv.querySelector('.del-opt-btn').onclick = () => {
+                    questions[qIdx].options.splice(oIdx, 1);
+                    if (questions[qIdx].correct >= questions[qIdx].options.length) {
+                        questions[qIdx].correct = Math.max(0, questions[qIdx].options.length - 1);
+                    }
+                    updateBlock(block.id, { questions });
+                    renderContent();
+                };
                 optsContainer.appendChild(optDiv);
             });
+
+            qDiv.querySelector('.add-opt-btn').onclick = () => {
+                questions[qIdx].options.push("Nouvelle option");
+                updateBlock(block.id, { questions });
+                renderContent();
+            };
+
             qDiv.querySelector('.del-q-btn').onclick = () => { const newQs = questions.filter((_, i) => i !== qIdx); updateBlock(block.id, { questions: newQs }); renderContent(); };
             editorContainer.appendChild(qDiv);
         });
         div.querySelector('.add-q-btn').onclick = () => { updateBlock(block.id, { questions: [...questions, { question: "Nouvelle question", options: ["A", "B"], correct: 0 }] }); renderContent(); };
     } else {
-        div.className = 'bg-slate-800/50 p-6 rounded-xl border border-slate-700 my-6 shadow-sm';
-        let currentQ = 0;
-        const renderQuizPlay = () => {
-            if (questions.length === 0) { div.innerHTML = '<div class="p-4 bg-slate-800 rounded text-slate-500 text-xs">Quiz vide.</div>'; return; }
-            const activeQ = questions[currentQ];
-            div.innerHTML = `
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex items-center gap-2"><i data-lucide="brain" class="w-5 h-5 text-indigo-400"></i><h3 class="font-semibold text-white">Quiz</h3></div>
-                    <span class="text-xs text-slate-500">Question ${currentQ + 1} / ${questions.length}</span>
-                </div>
-                <p class="text-slate-300 mb-4 font-medium">${activeQ.question}</p>
-                <div class="space-y-2 mb-4 options-list"></div>
-                <div class="flex justify-end next-btn-container"></div>
-            `;
-            const optsList = div.querySelector('.options-list');
-            activeQ.options.forEach((opt, idx) => {
-                const btn = document.createElement('button');
-                btn.className = 'w-full text-left p-3 rounded-lg text-sm transition-all border bg-slate-700/30 border-slate-700 hover:bg-slate-700 hover:border-slate-500 text-slate-300';
-                btn.textContent = opt;
-                btn.onclick = () => {
-                    const isCorrect = idx === activeQ.correct;
-                    btn.className = isCorrect ? 'w-full text-left p-3 rounded-lg text-sm transition-all border bg-green-900/20 border-green-500 text-green-200' : 'w-full text-left p-3 rounded-lg text-sm transition-all border bg-red-900/20 border-red-500 text-red-200';
-                    const allBtns = optsList.querySelectorAll('button');
-                    allBtns.forEach(b => b.disabled = true);
-                    const nextContainer = div.querySelector('.next-btn-container');
-                    if (currentQ < questions.length - 1) {
-                        const nextBtn = document.createElement('button');
-                        nextBtn.className = 'px-4 py-2 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-500';
-                        nextBtn.innerHTML = 'Question Suivante &rarr;';
-                        nextBtn.onclick = () => { currentQ++; renderQuizPlay(); };
-                        nextContainer.appendChild(nextBtn);
-                    } else { nextContainer.innerHTML = '<span class="text-green-400 text-sm font-bold">Quiz Terminé !</span>'; }
-                };
-                optsList.appendChild(btn);
-            });
-            lucide.createIcons();
-        };
-        renderQuizPlay();
+        div.className = 'my-6';
+        if (questions.length === 0) { div.innerHTML = '<div class="p-4 bg-slate-800 rounded text-slate-500 text-xs">Quiz vide.</div>'; return div; }
+
+        const btn = document.createElement('button');
+        btn.className = 'w-full py-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex items-center justify-center gap-3 transition-all group';
+        btn.innerHTML = `
+            <div class="p-2 bg-indigo-500/20 rounded-lg text-indigo-400 group-hover:text-indigo-300 group-hover:scale-110 transition-transform">
+                <i data-lucide="brain" class="w-6 h-6"></i>
+            </div>
+            <div class="text-left">
+                <h3 class="text-slate-200 font-bold text-sm">Lancer le Quiz</h3>
+                <p class="text-slate-500 text-xs">${questions.length} questions</p>
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-600 group-hover:text-slate-400 ml-auto mr-4"></i>
+        `;
+        btn.onclick = () => startQuizSession(questions, block.id);
+        div.appendChild(btn);
     }
     return div;
 }
@@ -764,49 +957,20 @@ function renderFlashcardBlock(block) {
         div.className = 'my-6';
         if (cards.length === 0) { div.innerHTML = '<div class="text-center p-10 text-slate-500">Aucune flashcard.</div>'; return div; }
 
-        let current = 0;
-        let flipped = false;
-
-        const renderCard = () => {
-            div.innerHTML = '';
-            const wrapper = document.createElement('div');
-            wrapper.className = 'flex flex-col items-center justify-center py-4';
-
-            const cardDiv = document.createElement('div');
-            cardDiv.className = 'relative w-full max-w-md h-64 perspective-1000 cursor-pointer group';
-            cardDiv.onclick = () => { flipped = !flipped; renderCard(); };
-
-            cardDiv.innerHTML = `
-                <div class="relative w-full h-full duration-500 preserve-3d transition-transform ${flipped ? 'rotate-y-180' : ''}">
-                    <div class="absolute w-full h-full backface-hidden bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-2xl shadow-xl flex flex-col items-center justify-center p-8 text-center border border-indigo-500/30 ${flipped ? 'hidden' : 'flex'}">
-                        <i data-lucide="brain" class="w-10 h-10 text-white/20 mb-4"></i>
-                        <h3 class="text-xl font-bold text-white">${cards[current].question}</h3>
-                        <p class="mt-4 text-indigo-200 text-xs">Clique pour révéler</p>
-                    </div>
-                    <div class="absolute w-full h-full backface-hidden bg-slate-800 rotate-y-180 rounded-2xl shadow-xl flex flex-col items-center justify-center p-8 text-center border border-slate-600 ${flipped ? 'flex' : 'hidden'}">
-                        <i data-lucide="check-circle" class="w-10 h-10 text-green-500/20 mb-4"></i>
-                        <p class="text-lg text-white">${cards[current].answer}</p>
-                    </div>
-                </div>
-            `;
-
-            const controls = document.createElement('div');
-            controls.className = 'flex items-center gap-4 mt-8';
-            controls.innerHTML = `
-                <button id="prev-card-${block.id}" class="p-2 rounded-full bg-slate-700 text-white disabled:opacity-50 hover:bg-slate-600" ${current === 0 ? 'disabled' : ''}>Précédent</button>
-                <span class="text-slate-400 text-sm">${current + 1} / ${cards.length}</span>
-                <button id="next-card-${block.id}" class="p-2 rounded-full bg-slate-700 text-white disabled:opacity-50 hover:bg-slate-600" ${current === cards.length - 1 ? 'disabled' : ''}>Suivant</button>
-            `;
-
-            controls.querySelector(`#prev-card-${block.id}`).onclick = (e) => { e.stopPropagation(); flipped = false; current = Math.max(0, current - 1); renderCard(); };
-            controls.querySelector(`#next-card-${block.id}`).onclick = (e) => { e.stopPropagation(); flipped = false; current = Math.min(cards.length - 1, current + 1); renderCard(); };
-
-            wrapper.appendChild(cardDiv);
-            wrapper.appendChild(controls);
-            div.appendChild(wrapper);
-            lucide.createIcons();
-        };
-        renderCard();
+        const btn = document.createElement('button');
+        btn.className = 'w-full py-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex items-center justify-center gap-3 transition-all group';
+        btn.innerHTML = `
+            <div class="p-2 bg-indigo-500/20 rounded-lg text-indigo-400 group-hover:text-indigo-300 group-hover:scale-110 transition-transform">
+                <i data-lucide="layers" class="w-6 h-6"></i>
+            </div>
+            <div class="text-left">
+                <h3 class="text-slate-200 font-bold text-sm">Lancer les Flashcards</h3>
+                <p class="text-slate-500 text-xs">${cards.length} cartes</p>
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-600 group-hover:text-slate-400 ml-auto mr-4"></i>
+        `;
+        btn.onclick = () => startFlashcardSession(cards, block.id);
+        div.appendChild(btn);
     }
     return div;
 }
