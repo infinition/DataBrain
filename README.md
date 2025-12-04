@@ -2,7 +2,11 @@
 
 DataBrain is a powerful, modular, and local-first knowledge management and learning platform designed to help you organize, learn, and create interactive content effortlessly. Built with a block-based architecture, it combines the flexibility of a notebook with the interactivity of a modern web application.
 
+Try it : [infinition.github.io/DataBrain/ ](https://infinition.github.io/DataBrain/)
+
 <img width="1157" height="956" alt="image" src="https://github.com/user-attachments/assets/9316948a-9d15-4814-9455-3d2614f29210" />
+
+
 
 ## 🚀 Key Features
 
