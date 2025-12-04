@@ -3,7 +3,7 @@
 ## Blocs
 - Spreadsheet
 - Bloc lien interne + backlinds en mentionnant [[MaNote]], voir tout les backlinks automatiquement. (Node ?)
-- Bloc "Embed externe" pour intégrer des vidéos, des images, des fichiers, Youtu, PDF, Google Doc, etc.
+- [x] Bloc "Embed externe" pour intégrer des vidéos, des images, des fichiers, Youtu, PDF, Google Doc, etc.
 - Bloc "Graphique / Chart" dynamique basé sur Chart.js ou ECharts.
 - Bloc "Timeline / Frise chronologique" pour Histoire/projet/etapes processus.
 - Bloc "Mindmap / Arbre / Graph view"

@@ -134,6 +134,7 @@ function renderBlocks(blocks) {
             case 'flashcard': contentDiv = renderFlashcardBlock(block); break;
             case 'custom-widget': contentDiv = renderCustomWidgetBlock(block); break;
             case 'jupyter': contentDiv = renderJupyterBlock(block); break;
+            case 'embed': contentDiv = renderEmbedBlock(block); break;
             default: contentDiv = document.createElement('div');
         }
         blockWrapper.appendChild(contentDiv);
@@ -188,6 +189,7 @@ function renderAddBlockPanel(index) {
             <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="flashcard" title="Flashcards"><i data-lucide="layers" class="w-5 h-5"></i></button>
             <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="custom-widget" title="Widget Custom"><i data-lucide="code" class="w-5 h-5"></i></button>
             <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="jupyter" title="Jupyter Notebook"><i data-lucide="play-circle" class="w-5 h-5"></i></button>
+            <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="embed" title="Embed / Fichier"><i data-lucide="paperclip" class="w-5 h-5"></i></button>
         </div>
         <button class="cancel-btn mt-4 text-xs text-slate-500 hover:text-red-400 underline">Annuler</button>
     `;
@@ -1624,6 +1626,137 @@ function renderAudioBlock(block) {
     return div;
 }
 
+function renderEmbedBlock(block) {
+    const div = document.createElement('div');
+    div.className = 'my-6';
+    const content = block.content || { src: '', title: '', type: 'auto' };
+
+    if (editMode) {
+        div.innerHTML = `
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs text-slate-500 uppercase font-bold flex items-center gap-2">
+                        <i data-lucide="paperclip" class="w-3.5 h-3.5"></i> Configuration Embed
+                    </label>
+                    <select class="type-select bg-slate-900 border border-slate-600 text-white text-xs px-2 py-1 rounded outline-none focus:border-indigo-500">
+                        <option value="auto" ${content.type === 'auto' ? 'selected' : ''}>Auto-détection</option>
+                        <option value="pdf" ${content.type === 'pdf' ? 'selected' : ''}>PDF</option>
+                        <option value="google" ${content.type === 'google' ? 'selected' : ''}>Google Docs/Sheets/Slides</option>
+                        <option value="office" ${content.type === 'office' ? 'selected' : ''}>Microsoft Office Online</option>
+                        <option value="csv" ${content.type === 'csv' ? 'selected' : ''}>CSV (Tableau interactif)</option>
+                        <option value="epub" ${content.type === 'epub' ? 'selected' : ''}>EPUB / eBook</option>
+                        <option value="iframe" ${content.type === 'iframe' ? 'selected' : ''}>Iframe Générique</option>
+                    </select>
+                </div>
+                <input type="text" class="embed-title-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="Titre du fichier" value="${content.title || ''}">
+                <input type="text" class="embed-src-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="URL du fichier ou lien embed" value="${content.src || ''}">
+                <p class="text-[10px] text-slate-500">Supporte : PDF, Google Docs, Office Online, CSV, EPUB, etc.</p>
+            </div>
+        `;
+
+        div.querySelector('.embed-title-input').oninput = (e) => updateBlock(block.id, { ...content, title: e.target.value }, true);
+        div.querySelector('.embed-src-input').oninput = (e) => updateBlock(block.id, { ...content, src: e.target.value }, true);
+        div.querySelector('.type-select').onchange = (e) => updateBlock(block.id, { ...content, type: e.target.value });
+
+    } else {
+        const src = content.src || '';
+        let type = content.type;
+
+        // Auto-detect type if 'auto'
+        if (type === 'auto' && src) {
+            const lowerSrc = src.toLowerCase();
+            if (lowerSrc.endsWith('.pdf')) type = 'pdf';
+            else if (lowerSrc.includes('docs.google.com') || lowerSrc.includes('drive.google.com')) type = 'google';
+            else if (lowerSrc.includes('office.live.com') || lowerSrc.endsWith('.docx') || lowerSrc.endsWith('.xlsx') || lowerSrc.endsWith('.pptx')) type = 'office';
+            else if (lowerSrc.endsWith('.csv')) type = 'csv';
+            else if (lowerSrc.endsWith('.epub')) type = 'epub';
+            else type = 'iframe';
+        }
+
+        div.innerHTML = `
+            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden flex flex-col shadow-lg w-full h-[600px] relative group">
+                <div class="bg-slate-900/80 backdrop-blur p-3 border-b border-slate-700 flex items-center justify-between absolute top-0 left-0 right-0 z-10">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="${getIconForType(type)}" class="w-4 h-4 text-indigo-400"></i>
+                        <span class="text-sm font-bold text-slate-200">${content.title || 'Fichier intégré'}</span>
+                    </div>
+                    <a href="${src}" target="_blank" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 bg-slate-800 px-2 py-1 rounded border border-slate-700">
+                        <i data-lucide="external-link" class="w-3 h-3"></i> Ouvrir
+                    </a>
+                </div>
+                <div class="flex-1 bg-slate-900 pt-12 h-full relative">
+                    ${renderEmbedContent(type, src)}
+                </div>
+            </div>
+        `;
+    }
+    return div;
+}
+
+function getIconForType(type) {
+    switch (type) {
+        case 'pdf': return 'file-text';
+        case 'google': return 'file';
+        case 'office': return 'file-spreadsheet';
+        case 'csv': return 'table';
+        case 'epub': return 'book-open';
+        default: return 'paperclip';
+    }
+}
+
+function renderEmbedContent(type, src) {
+    if (!src) return '<div class="flex items-center justify-center h-full text-slate-500 text-sm">Aucune source définie</div>';
+
+    switch (type) {
+        case 'pdf':
+            return `<iframe src="${src}" class="w-full h-full border-0"></iframe>`;
+
+        case 'google':
+            return `<iframe src="${src}" class="w-full h-full border-0"></iframe>`;
+
+        case 'office':
+            if (src.includes('view.officeapps.live.com')) {
+                return `<iframe src="${src}" class="w-full h-full border-0"></iframe>`;
+            }
+            return `<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(src)}" class="w-full h-full border-0"></iframe>`;
+
+        case 'csv':
+            const csvId = 'csv-' + Math.random().toString(36).substr(2, 9);
+            setTimeout(() => {
+                fetch(src)
+                    .then(r => r.text())
+                    .then(csvText => {
+                        const rows = csvText.trim().split('\\n').map(r => r.split(','));
+                        const table = document.getElementById(csvId);
+                        if (table && rows.length > 0) {
+                            let html = '<thead class="bg-slate-800 text-slate-300 sticky top-0"><tr>';
+                            rows[0].forEach(h => html += `<th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider border-b border-slate-700">${h}</th>`);
+                            html += '</tr></thead><tbody class="bg-slate-900 divide-y divide-slate-800">';
+                            rows.slice(1).forEach(row => {
+                                html += '<tr>';
+                                row.forEach(cell => html += `<td class="px-4 py-2 text-sm text-slate-400 whitespace-nowrap">${cell}</td>`);
+                                html += '</tr>';
+                            });
+                            html += '</tbody>';
+                            table.innerHTML = html;
+                        }
+                    })
+                    .catch(err => {
+                        const container = document.getElementById(csvId)?.parentElement;
+                        if (container) container.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-red-400 text-sm gap-2"><i data-lucide="alert-circle" class="w-6 h-6"></i> Erreur de chargement du CSV (CORS ou introuvable).</div>`;
+                        lucide.createIcons();
+                    });
+            }, 100);
+            return `<div class="w-full h-full overflow-auto custom-scrollbar"><table id="${csvId}" class="min-w-full divide-y divide-slate-700"></table></div>`;
+
+        case 'epub':
+            return `<iframe src="${src}" class="w-full h-full border-0"></iframe>`;
+
+        default:
+            return `<iframe src="${src}" class="w-full h-full border-0"></iframe>`;
+    }
+}
+
 function typesetMath(element) {
     if (window.MathJax) {
         window.MathJax.typesetPromise([element]).catch((err) => console.log('MathJax error:', err));
@@ -1705,7 +1838,8 @@ function addBlock(type, content, index = -1) {
                                 : type === 'math' ? { latex: "E = mc^2" }
                                     : type === 'custom-widget' ? { html: "<div>Hello</div>", css: "div { color: blue; }", js: "console.log('Hi');" }
                                         : type === 'jupyter' ? { code: "import numpy as np\nimport matplotlib.pyplot as plt\n\nx = np.linspace(0, 10, 100)\ny = np.sin(x)\n\nplt.plot(x, y)\nplt.title('Sinus Wave')\nplt.show()" }
-                                            : {};
+                                            : type === 'embed' ? { src: "", title: "Nouveau fichier", type: "auto" }
+                                                : {};
 
     const newBlock = {
         id: generateId(),
