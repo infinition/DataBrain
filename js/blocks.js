@@ -109,7 +109,9 @@ function renderBlocks(blocks) {
             case 'text': contentDiv = renderTextBlock(block); break;
             case 'code': contentDiv = renderCodeBlock(block); break;
             case 'video': contentDiv = renderVideoBlock(block); break;
+            case 'audio': contentDiv = renderAudioBlock(block); break;
             case 'image': contentDiv = renderImageBlock(block); break;
+            case 'math': contentDiv = renderMathBlock(block); break;
             case 'quiz': contentDiv = renderQuizBlock(block); break;
             case 'flashcard': contentDiv = renderFlashcardBlock(block); break;
             case 'custom-widget': contentDiv = renderCustomWidgetBlock(block); break;
@@ -160,7 +162,9 @@ function renderAddBlockPanel(index) {
             <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="text" title="Texte"><i data-lucide="type" class="w-5 h-5"></i></button>
             <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="code" title="Code"><i data-lucide="terminal" class="w-5 h-5"></i></button>
             <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="video" title="Vidéo"><i data-lucide="video" class="w-5 h-5"></i></button>
+            <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="audio" title="Audio"><i data-lucide="music" class="w-5 h-5"></i></button>
             <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="image" title="Image"><i data-lucide="image" class="w-5 h-5"></i></button>
+            <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="math" title="Math"><i data-lucide="sigma" class="w-5 h-5"></i></button>
             <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="quiz" title="Quiz"><i data-lucide="brain" class="w-5 h-5"></i></button>
             <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="flashcard" title="Flashcards"><i data-lucide="layers" class="w-5 h-5"></i></button>
             <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="custom-widget" title="Widget Custom"><i data-lucide="code" class="w-5 h-5"></i></button>
@@ -475,6 +479,8 @@ function renderTextBlock(block) {
                     }
                 });
             });
+
+            typesetMath(div);
         } catch (e) {
             div.textContent = block.content;
             console.error("Markdown parsing error:", e);
@@ -790,19 +796,34 @@ function renderCodeBlock(block) {
 function renderVideoBlock(block) {
     const div = document.createElement('div');
     div.className = 'my-6';
+    const align = block.content.align || 'center';
+    const justify = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center';
+
     if (editMode) {
         div.innerHTML = `
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col gap-3">
-                <label class="text-xs text-slate-500 uppercase font-bold flex items-center gap-2"><i data-lucide="video" class="w-3.5 h-3.5"></i> Configuration Vidéo</label>
+                <div class="flex items-center justify-between">
+                    <label class="text-xs text-slate-500 uppercase font-bold flex items-center gap-2"><i data-lucide="video" class="w-3.5 h-3.5"></i> Configuration Vidéo</label>
+                    <div class="flex bg-slate-900 rounded p-1 border border-slate-600">
+                        <button class="align-btn p-1 rounded hover:bg-slate-700 ${align === 'left' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="left" title="Aligner à gauche"><i data-lucide="align-left" class="w-4 h-4"></i></button>
+                        <button class="align-btn p-1 rounded hover:bg-slate-700 ${align === 'center' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="center" title="Centrer"><i data-lucide="align-center" class="w-4 h-4"></i></button>
+                        <button class="align-btn p-1 rounded hover:bg-slate-700 ${align === 'right' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="right" title="Aligner à droite"><i data-lucide="align-right" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
                 <input type="text" class="video-title-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="Titre de la vidéo" value="${block.content.title}">
                 <input type="text" class="video-src-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="URL de la vidéo" value="${block.content.src}">
             </div>
         `;
         div.querySelector('.video-title-input').oninput = (e) => updateBlock(block.id, { ...block.content, title: e.target.value });
         div.querySelector('.video-src-input').oninput = (e) => updateBlock(block.id, { ...block.content, src: e.target.value });
+        div.querySelectorAll('.align-btn').forEach(btn => {
+            btn.onclick = () => { updateBlock(block.id, { ...block.content, align: btn.dataset.align }); };
+        });
     } else {
+        div.style.display = 'flex';
+        div.style.justifyContent = justify;
         div.innerHTML = `
-            <div class="aspect-video bg-black rounded-xl flex flex-col items-center justify-center border border-slate-700 relative group cursor-pointer shadow-lg overflow-hidden">
+            <div class="aspect-video bg-black rounded-xl flex flex-col items-center justify-center border border-slate-700 relative group cursor-pointer shadow-lg overflow-hidden w-full max-w-3xl">
                 ${block.content.src ? `<video src="${block.content.src}" controls class="w-full h-full object-contain"></video>` : `
                 <div class="flex flex-col items-center justify-center">
                     <i data-lucide="play-circle" class="w-16 h-16 text-white/50 mb-2"></i>
@@ -818,17 +839,32 @@ function renderVideoBlock(block) {
 function renderImageBlock(block) {
     const div = document.createElement('div');
     div.className = 'my-6';
+    const align = block.content.align || 'center';
+    const justify = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center';
+
     if (editMode) {
         div.innerHTML = `
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col gap-3">
-                <label class="text-xs text-slate-500 uppercase font-bold flex items-center gap-2"><i data-lucide="image" class="w-3.5 h-3.5"></i> Configuration Image</label>
+                <div class="flex items-center justify-between">
+                    <label class="text-xs text-slate-500 uppercase font-bold flex items-center gap-2"><i data-lucide="image" class="w-3.5 h-3.5"></i> Configuration Image</label>
+                    <div class="flex bg-slate-900 rounded p-1 border border-slate-600">
+                        <button class="align-btn p-1 rounded hover:bg-slate-700 ${align === 'left' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="left" title="Aligner à gauche"><i data-lucide="align-left" class="w-4 h-4"></i></button>
+                        <button class="align-btn p-1 rounded hover:bg-slate-700 ${align === 'center' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="center" title="Centrer"><i data-lucide="align-center" class="w-4 h-4"></i></button>
+                        <button class="align-btn p-1 rounded hover:bg-slate-700 ${align === 'right' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="right" title="Aligner à droite"><i data-lucide="align-right" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
                 <input type="text" class="img-src-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm" placeholder="URL de l'image" value="${block.content.src}">
                 <input type="text" class="img-cap-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm" placeholder="Légende" value="${block.content.caption}">
             </div>
         `;
         div.querySelector('.img-src-input').oninput = (e) => updateBlock(block.id, { ...block.content, src: e.target.value });
         div.querySelector('.img-cap-input').oninput = (e) => updateBlock(block.id, { ...block.content, caption: e.target.value });
+        div.querySelectorAll('.align-btn').forEach(btn => {
+            btn.onclick = () => { updateBlock(block.id, { ...block.content, align: btn.dataset.align }); };
+        });
     } else {
+        div.style.display = 'flex';
+        div.style.justifyContent = justify;
         div.innerHTML = `
             <figure class="flex flex-col items-center">
                 <img src="${block.content.src}" alt="content" class="rounded-xl max-h-[500px] object-contain border border-slate-700 bg-slate-900" />
@@ -1278,6 +1314,132 @@ function renderCustomWidgetBlock(block) {
     return div;
 }
 
+function renderAudioBlock(block) {
+    const div = document.createElement('div');
+    div.className = 'my-6';
+    const align = block.content.align || 'center';
+    const justify = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center';
+
+    if (editMode) {
+        div.innerHTML = `
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs text-slate-500 uppercase font-bold flex items-center gap-2"><i data-lucide="music" class="w-3.5 h-3.5"></i> Configuration Audio</label>
+                    <div class="flex bg-slate-900 rounded p-1 border border-slate-600">
+                        <button class="align-btn p-1 rounded hover:bg-slate-700 ${align === 'left' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="left" title="Aligner à gauche"><i data-lucide="align-left" class="w-4 h-4"></i></button>
+                        <button class="align-btn p-1 rounded hover:bg-slate-700 ${align === 'center' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="center" title="Centrer"><i data-lucide="align-center" class="w-4 h-4"></i></button>
+                        <button class="align-btn p-1 rounded hover:bg-slate-700 ${align === 'right' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="right" title="Aligner à droite"><i data-lucide="align-right" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+                <input type="text" class="audio-title-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="Titre de l'audio" value="${block.content.title || ''}">
+                <div class="flex gap-2">
+                    <input type="text" class="audio-src-input flex-1 bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="URL du fichier audio" value="${block.content.src || ''}">
+                    <button class="upload-btn bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded text-sm transition-colors" title="Uploader un fichier"><i data-lucide="upload" class="w-4 h-4"></i></button>
+                    <input type="file" class="hidden-file-input hidden" accept="audio/*">
+                </div>
+            </div>
+        `;
+
+        div.querySelector('.audio-title-input').oninput = (e) => updateBlock(block.id, { ...block.content, title: e.target.value });
+        div.querySelector('.audio-src-input').oninput = (e) => updateBlock(block.id, { ...block.content, src: e.target.value });
+
+        const fileInput = div.querySelector('.hidden-file-input');
+        div.querySelector('.upload-btn').onclick = () => fileInput.click();
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    updateBlock(block.id, { ...block.content, src: ev.target.result });
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        div.querySelectorAll('.align-btn').forEach(btn => {
+            btn.onclick = () => { updateBlock(block.id, { ...block.content, align: btn.dataset.align }); };
+        });
+
+    } else {
+        div.style.display = 'flex';
+        div.style.justifyContent = justify;
+        div.innerHTML = `
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col gap-2 w-full max-w-md shadow-lg">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="p-2 bg-indigo-500/20 rounded-lg text-indigo-400">
+                        <i data-lucide="music" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-sm">${block.content.title || 'Audio sans titre'}</h3>
+                    </div>
+                </div>
+                ${block.content.src ? `<audio controls src="${block.content.src}" class="w-full"></audio>` : '<div class="text-slate-500 text-xs italic">Aucune source audio.</div>'}
+            </div>
+        `;
+    }
+    return div;
+}
+
+function typesetMath(element) {
+    if (window.MathJax) {
+        window.MathJax.typesetPromise([element]).catch((err) => console.log('MathJax error:', err));
+    }
+}
+
+function renderMathBlock(block) {
+    const div = document.createElement('div');
+    div.className = 'my-6';
+    const align = block.content.align || 'center';
+    const justify = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center';
+
+    if (editMode) {
+        div.innerHTML = `
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs text-slate-500 uppercase font-bold flex items-center gap-2"><i data-lucide="sigma" class="w-3.5 h-3.5"></i> Éditeur LaTeX</label>
+                    <div class="flex bg-slate-900 rounded p-1 border border-slate-600">
+                        <button class="align-btn p-1 rounded hover:bg-slate-700 ${align === 'left' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="left" title="Aligner à gauche"><i data-lucide="align-left" class="w-4 h-4"></i></button>
+                        <button class="align-btn p-1 rounded hover:bg-slate-700 ${align === 'center' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="center" title="Centrer"><i data-lucide="align-center" class="w-4 h-4"></i></button>
+                        <button class="align-btn p-1 rounded hover:bg-slate-700 ${align === 'right' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="right" title="Aligner à droite"><i data-lucide="align-right" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+                <textarea class="math-input w-full h-32 bg-slate-900 border border-slate-600 text-slate-300 p-2 rounded text-sm font-mono outline-none focus:border-indigo-500 resize-none" placeholder="Entrez votre formule LaTeX ici... ex: E = mc^2">${block.content.latex || ''}</textarea>
+                <div class="text-xs text-slate-500">Aperçu :</div>
+                <div class="math-preview p-4 bg-slate-900 rounded border border-slate-700 flex justify-center overflow-x-auto">
+                    $$${block.content.latex || ''}$$
+                </div>
+            </div>
+        `;
+
+        const textarea = div.querySelector('.math-input');
+        const preview = div.querySelector('.math-preview');
+
+        textarea.oninput = (e) => {
+            const latex = e.target.value;
+            updateBlock(block.id, { ...block.content, latex: latex }, true); // Skip render to keep focus
+            preview.innerHTML = `$$${latex}$$`;
+            typesetMath(preview);
+        };
+
+        div.querySelectorAll('.align-btn').forEach(btn => {
+            btn.onclick = () => { updateBlock(block.id, { ...block.content, align: btn.dataset.align }); };
+        });
+
+        typesetMath(preview);
+
+    } else {
+        div.style.display = 'flex';
+        div.style.justifyContent = justify;
+        div.innerHTML = `
+            <div class="overflow-x-auto py-2 px-4">
+                $$${block.content.latex || ''}$$
+            </div>
+        `;
+        typesetMath(div);
+    }
+    return div;
+}
+
 function updateBlock(blockId, newContent, skipRender = false) {
     const activeData = findActiveData();
     if (!activeData) return;
@@ -1294,9 +1456,11 @@ function addBlock(type, content, index = -1) {
             : type === 'quiz' ? { questions: [{ question: "Question?", options: ["A", "B"], correct: 0 }] }
                 : type === 'flashcard' ? [{ question: "Question?", answer: "Réponse" }]
                     : type === 'video' ? { title: "Nouvelle vidéo", src: "" }
-                        : type === 'image' ? { src: "", caption: "" }
-                            : type === 'custom-widget' ? { html: "<div>Hello</div>", css: "div { color: blue; }", js: "console.log('Hi');" }
-                                : {};
+                        : type === 'audio' ? { title: "Nouvel audio", src: "" }
+                            : type === 'image' ? { src: "", caption: "" }
+                                : type === 'math' ? { latex: "E = mc^2" }
+                                    : type === 'custom-widget' ? { html: "<div>Hello</div>", css: "div { color: blue; }", js: "console.log('Hi');" }
+                                        : {};
 
     const newBlock = {
         id: generateId(),
