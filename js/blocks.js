@@ -1038,14 +1038,42 @@ function renderVideoBlock(block) {
     } else {
         div.style.display = 'flex';
         div.style.justifyContent = justify;
-        div.innerHTML = `
-            <div class="aspect-video bg-black rounded-xl flex flex-col items-center justify-center border border-slate-700 relative group cursor-pointer shadow-lg overflow-hidden w-full max-w-3xl">
-                ${block.content.src ? `<video src="${block.content.src}" controls class="w-full h-full object-contain"></video>` : `
+
+        const src = block.content.src || '';
+        let videoContent = '';
+        let isYoutube = false;
+
+        // Check for YouTube
+        const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+        const youtubeMatch = src.match(youtubeRegex);
+
+        if (youtubeMatch && youtubeMatch[1]) {
+            isYoutube = true;
+            const videoId = youtubeMatch[1];
+            videoContent = `
+                <iframe 
+                    src="https://www.youtube.com/embed/${videoId}" 
+                    title="${block.content.title || 'YouTube video'}" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen 
+                    class="w-full h-full absolute top-0 left-0"
+                ></iframe>
+            `;
+        } else if (src) {
+            videoContent = `<video src="${src}" controls class="w-full h-full object-contain"></video>`;
+        } else {
+            videoContent = `
                 <div class="flex flex-col items-center justify-center">
                     <i data-lucide="play-circle" class="w-16 h-16 text-white/50 mb-2"></i>
                     <span class="text-slate-500 text-xs">Aucune source vidéo</span>
-                </div>`}
-                <div class="absolute top-4 left-4 bg-black/50 px-2 py-1 rounded text-white text-sm backdrop-blur-md">${block.content.title}</div>
+                </div>`;
+        }
+
+        div.innerHTML = `
+            <div class="aspect-video bg-black rounded-xl flex flex-col items-center justify-center border border-slate-700 relative group cursor-pointer shadow-lg overflow-hidden w-full max-w-3xl">
+                ${videoContent}
+                ${(!isYoutube && block.content.title) ? `<div class="absolute top-4 left-4 bg-black/50 px-2 py-1 rounded text-white text-sm backdrop-blur-md pointer-events-none">${block.content.title}</div>` : ''}
             </div>
         `;
     }
