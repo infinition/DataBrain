@@ -1100,14 +1100,16 @@ function renderCustomWidgetBlock(block) {
     div.className = 'my-6';
 
     const defaultHtml = '<div class="p-4 bg-indigo-500 text-white rounded">Hello Widget!</div>';
-    const defaultCss = '.p-4 { font-weight: bold; }';
     const defaultJs = 'console.log("Widget loaded");';
 
     const content = {
         html: block.content.html || defaultHtml,
         css: block.content.css || defaultCss,
-        js: block.content.js || defaultJs
+        js: block.content.js || defaultJs,
+        align: block.content.align || 'center'
     };
+
+    const getJustify = (align) => align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center';
 
     if (editMode) {
         div.innerHTML = `
@@ -1117,9 +1119,16 @@ function renderCustomWidgetBlock(block) {
                         <i data-lucide="code" class="w-4 h-4"></i>
                         <span class="text-xs font-bold uppercase">Éditeur de Widget Custom</span>
                     </div>
-                    <button class="refresh-btn text-xs flex items-center gap-1 text-slate-400 hover:text-white bg-slate-700 px-2 py-1 rounded transition-colors">
-                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> Actualiser l'aperçu
-                    </button>
+                    <div class="flex items-center gap-3">
+                         <div class="flex bg-slate-900 rounded p-1 border border-slate-600">
+                            <button class="align-btn p-1 rounded hover:bg-slate-700 ${content.align === 'left' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="left" title="Aligner à gauche"><i data-lucide="align-left" class="w-4 h-4"></i></button>
+                            <button class="align-btn p-1 rounded hover:bg-slate-700 ${content.align === 'center' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="center" title="Centrer"><i data-lucide="align-center" class="w-4 h-4"></i></button>
+                            <button class="align-btn p-1 rounded hover:bg-slate-700 ${content.align === 'right' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="right" title="Aligner à droite"><i data-lucide="align-right" class="w-4 h-4"></i></button>
+                        </div>
+                        <button class="refresh-btn text-xs flex items-center gap-1 text-slate-400 hover:text-white bg-slate-700 px-2 py-1 rounded transition-colors">
+                            <i data-lucide="refresh-cw" class="w-3 h-3"></i> Actualiser
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1148,7 +1157,8 @@ function renderCustomWidgetBlock(block) {
             updateBlock(block.id, {
                 html: div.querySelector('.widget-html').value,
                 css: div.querySelector('.widget-css').value,
-                js: div.querySelector('.widget-js').value
+                js: div.querySelector('.widget-js').value,
+                align: content.align
             });
         };
 
@@ -1169,7 +1179,7 @@ function renderCustomWidgetBlock(block) {
                 <html>
                 <head>
                     <style>
-                        body { margin: 0; padding: 0; font-family: sans-serif; background: transparent; }
+                        body { margin: 0; padding: 0; font-family: sans-serif; background: transparent; display: flex; justify-content: ${getJustify(content.align)}; }
                         ${currentCss}
                     </style>
                 </head>
@@ -1177,7 +1187,10 @@ function renderCustomWidgetBlock(block) {
                     ${currentHtml}
                     <script>
                         try {
-                            ${currentJs}
+                            (function() {
+                                this.shadowRoot = document;
+                                ${currentJs}
+                            }).call({ shadowRoot: document });
                         } catch (e) {
                             console.error("Widget JS Error:", e);
                         }
@@ -1205,6 +1218,19 @@ function renderCustomWidgetBlock(block) {
 
         div.querySelector('.refresh-btn').onclick = renderPreview;
 
+        // Alignment Buttons
+        div.querySelectorAll('.align-btn').forEach(btn => {
+            btn.onclick = () => {
+                content.align = btn.dataset.align;
+                updateWidget(); // Save state
+                // Update UI
+                div.querySelectorAll('.align-btn').forEach(b => {
+                    b.className = `align-btn p-1 rounded hover:bg-slate-700 ${b.dataset.align === content.align ? 'bg-indigo-600 text-white' : 'text-slate-400'}`;
+                });
+                renderPreview(); // Re-render preview with new alignment
+            };
+        });
+
         // Initial Render
         setTimeout(renderPreview, 100);
 
@@ -1218,7 +1244,7 @@ function renderCustomWidgetBlock(block) {
             <html>
             <head>
                 <style>
-                    body { margin: 0; padding: 0; font-family: sans-serif; background: transparent; }
+                    body { margin: 0; padding: 0; font-family: sans-serif; background: transparent; display: flex; justify-content: ${getJustify(content.align)}; }
                     ${content.css}
                 </style>
             </head>
@@ -1226,7 +1252,10 @@ function renderCustomWidgetBlock(block) {
                 ${content.html}
                 <script>
                     try {
-                        ${content.js}
+                        (function() {
+                            this.shadowRoot = document;
+                            ${content.js}
+                        }).call({ shadowRoot: document });
                     } catch (e) {
                         console.error("Widget JS Error:", e);
                     }
