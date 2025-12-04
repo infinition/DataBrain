@@ -112,6 +112,7 @@ function renderBlocks(blocks) {
             case 'image': contentDiv = renderImageBlock(block); break;
             case 'quiz': contentDiv = renderQuizBlock(block); break;
             case 'flashcard': contentDiv = renderFlashcardBlock(block); break;
+            case 'custom-widget': contentDiv = renderCustomWidgetBlock(block); break;
             default: contentDiv = document.createElement('div');
         }
         blockWrapper.appendChild(contentDiv);
@@ -162,6 +163,7 @@ function renderAddBlockPanel(index) {
             <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="image" title="Image"><i data-lucide="image" class="w-5 h-5"></i></button>
             <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="quiz" title="Quiz"><i data-lucide="brain" class="w-5 h-5"></i></button>
             <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="flashcard" title="Flashcards"><i data-lucide="layers" class="w-5 h-5"></i></button>
+            <button class="add-btn p-3 bg-slate-800 rounded-lg border border-slate-700 hover:border-indigo-500 hover:text-white text-slate-400 transition-all hover:-translate-y-1" data-type="custom-widget" title="Widget Custom"><i data-lucide="code" class="w-5 h-5"></i></button>
         </div>
         <button class="cancel-btn mt-4 text-xs text-slate-500 hover:text-red-400 underline">Annuler</button>
     `;
@@ -1093,6 +1095,160 @@ function renderFlashcardBlock(block) {
     return div;
 }
 
+function renderCustomWidgetBlock(block) {
+    const div = document.createElement('div');
+    div.className = 'my-6';
+
+    const defaultHtml = '<div class="p-4 bg-indigo-500 text-white rounded">Hello Widget!</div>';
+    const defaultCss = '.p-4 { font-weight: bold; }';
+    const defaultJs = 'console.log("Widget loaded");';
+
+    const content = {
+        html: block.content.html || defaultHtml,
+        css: block.content.css || defaultCss,
+        js: block.content.js || defaultJs
+    };
+
+    if (editMode) {
+        div.innerHTML = `
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col gap-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2 text-indigo-400">
+                        <i data-lucide="code" class="w-4 h-4"></i>
+                        <span class="text-xs font-bold uppercase">Éditeur de Widget Custom</span>
+                    </div>
+                    <button class="refresh-btn text-xs flex items-center gap-1 text-slate-400 hover:text-white bg-slate-700 px-2 py-1 rounded transition-colors">
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> Actualiser l'aperçu
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs text-slate-500 font-bold uppercase">HTML</label>
+                        <textarea class="widget-html w-full h-32 bg-slate-900 border border-slate-600 text-slate-300 p-2 rounded text-xs font-mono outline-none focus:border-indigo-500 resize-none">${content.html}</textarea>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs text-slate-500 font-bold uppercase">CSS</label>
+                        <textarea class="widget-css w-full h-32 bg-slate-900 border border-slate-600 text-slate-300 p-2 rounded text-xs font-mono outline-none focus:border-indigo-500 resize-none">${content.css}</textarea>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs text-slate-500 font-bold uppercase">JS</label>
+                        <textarea class="widget-js w-full h-32 bg-slate-900 border border-slate-600 text-slate-300 p-2 rounded text-xs font-mono outline-none focus:border-indigo-500 resize-none">${content.js}</textarea>
+                    </div>
+                </div>
+
+                <div class="preview-container border-t border-slate-700 pt-4 mt-2">
+                    <label class="text-xs text-slate-500 font-bold uppercase mb-2 block">Aperçu en direct</label>
+                    <div class="iframe-wrapper w-full rounded-xl overflow-hidden bg-transparent border border-slate-700/50 min-h-[100px]"></div>
+                </div>
+            </div>
+        `;
+
+        const updateWidget = () => {
+            updateBlock(block.id, {
+                html: div.querySelector('.widget-html').value,
+                css: div.querySelector('.widget-css').value,
+                js: div.querySelector('.widget-js').value
+            });
+        };
+
+        const renderPreview = () => {
+            const wrapper = div.querySelector('.iframe-wrapper');
+            wrapper.innerHTML = '';
+
+            const iframe = document.createElement('iframe');
+            iframe.className = 'w-full border-0 bg-transparent block';
+            iframe.style.minHeight = '200px';
+
+            const currentHtml = div.querySelector('.widget-html').value;
+            const currentCss = div.querySelector('.widget-css').value;
+            const currentJs = div.querySelector('.widget-js').value;
+
+            const srcDoc = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { margin: 0; padding: 0; font-family: sans-serif; background: transparent; }
+                        ${currentCss}
+                    </style>
+                </head>
+                <body>
+                    ${currentHtml}
+                    <script>
+                        try {
+                            ${currentJs}
+                        } catch (e) {
+                            console.error("Widget JS Error:", e);
+                        }
+                    </script>
+                </body>
+                </html>
+            `;
+
+            iframe.srcdoc = srcDoc;
+            iframe.onload = () => {
+                const height = iframe.contentWindow.document.body.scrollHeight;
+                iframe.style.height = (height + 20) + 'px';
+            };
+
+            wrapper.appendChild(iframe);
+        };
+
+        // Prevent drag propagation on the preview area to allow interaction (sliders, buttons)
+        div.querySelector('.preview-container').onmousedown = (e) => e.stopPropagation();
+
+        // Event Listeners
+        div.querySelector('.widget-html').oninput = updateWidget;
+        div.querySelector('.widget-css').oninput = updateWidget;
+        div.querySelector('.widget-js').oninput = updateWidget;
+
+        div.querySelector('.refresh-btn').onclick = renderPreview;
+
+        // Initial Render
+        setTimeout(renderPreview, 100);
+
+    } else {
+        const iframe = document.createElement('iframe');
+        iframe.className = 'w-full border-0 rounded-xl overflow-hidden bg-transparent';
+        iframe.style.minHeight = '200px';
+
+        const srcDoc = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { margin: 0; padding: 0; font-family: sans-serif; background: transparent; }
+                    ${content.css}
+                </style>
+            </head>
+            <body>
+                ${content.html}
+                <script>
+                    try {
+                        ${content.js}
+                    } catch (e) {
+                        console.error("Widget JS Error:", e);
+                    }
+                </script>
+            </body>
+            </html>
+        `;
+
+        iframe.srcdoc = srcDoc;
+
+        // Auto-resize iframe height
+        iframe.onload = () => {
+            const height = iframe.contentWindow.document.body.scrollHeight;
+            iframe.style.height = (height + 20) + 'px';
+        };
+
+        div.appendChild(iframe);
+    }
+
+    return div;
+}
+
 function updateBlock(blockId, newContent, skipRender = false) {
     const activeData = findActiveData();
     if (!activeData) return;
@@ -1110,7 +1266,8 @@ function addBlock(type, content, index = -1) {
                 : type === 'flashcard' ? [{ question: "Question?", answer: "Réponse" }]
                     : type === 'video' ? { title: "Nouvelle vidéo", src: "" }
                         : type === 'image' ? { src: "", caption: "" }
-                            : {};
+                            : type === 'custom-widget' ? { html: "<div>Hello</div>", css: "div { color: blue; }", js: "console.log('Hi');" }
+                                : {};
 
     const newBlock = {
         id: generateId(),
