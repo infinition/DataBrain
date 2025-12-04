@@ -4,7 +4,7 @@ const addFormationBtn = document.getElementById('add-formation-btn');
 const toggleEditModeBtn = document.getElementById('toggle-edit-mode');
 const editModeText = document.getElementById('edit-mode-text');
 const learnView = document.getElementById('learn-view');
-const addBlockControls = document.getElementById('add-block-controls');
+
 const mainContainer = document.getElementById('main-container');
 const dragOverlay = document.getElementById('drag-overlay');
 

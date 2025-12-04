@@ -57,7 +57,7 @@ function renderContent() {
         // Folder View
         learnView.classList.add('hidden');
         // flashcardsView.classList.add('hidden'); // Removed as flashcardsView is no longer used
-        addBlockControls.classList.add('hidden');
+
 
         // Show a "Folder Empty State" or list of children
         // For now, just clear the view or show a message
@@ -80,8 +80,7 @@ function renderContent() {
 
     // Always render learnView
     learnView.classList.remove('hidden');
-    if (editMode) addBlockControls.classList.remove('hidden');
-    else addBlockControls.classList.add('hidden');
+
     renderBlocks(activeItem.blocks || []);
 
     // Update Edit Mode Button State
