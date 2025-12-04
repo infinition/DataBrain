@@ -403,7 +403,7 @@ function renderTextBlock(block) {
                     preview.innerHTML = '<br>';
                 } else {
                     try {
-                        preview.innerHTML = marked.parse(chunkContent);
+                        preview.innerHTML = marked.parse(chunkContent, { breaks: true });
                         preview.querySelectorAll('a[href^="#"]').forEach(anchor => {
                             anchor.addEventListener('click', function (e) {
                                 e.preventDefault();
@@ -888,6 +888,10 @@ function renderQuizBlock(block) {
         };
 
         const editorContainer = div.querySelector(`#quiz-editor-${block.id}`);
+        // Limit height and add scroll
+        editorContainer.className = "space-y-4 relative overflow-hidden transition-all duration-300 ease-in-out";
+        editorContainer.style.maxHeight = "400px";
+
         questions.forEach((q, qIdx) => {
             const qDiv = document.createElement('div');
             qDiv.className = 'border border-slate-700 p-2 rounded bg-slate-900/50';
@@ -931,23 +935,47 @@ function renderQuizBlock(block) {
             qDiv.querySelector('.del-q-btn').onclick = () => { const newQs = questions.filter((_, i) => i !== qIdx); updateBlock(block.id, { questions: newQs }); renderContent(); };
             editorContainer.appendChild(qDiv);
         });
+
+        // Check if content is long enough to need a "Show More" button
+        if (questions.length > 3) { // Approximate check, can be refined based on actual height
+            const expandBtnContainer = document.createElement('div');
+            expandBtnContainer.className = 'absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#1e1e1e] to-transparent flex items-end justify-center pb-2 z-10';
+            expandBtnContainer.innerHTML = `
+                <button class="flex items-center gap-2 px-4 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-full shadow-lg transition-all">
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i> Voir tout le contenu
+                </button>
+            `;
+            expandBtnContainer.querySelector('button').onclick = () => {
+                editorContainer.style.maxHeight = 'none';
+                expandBtnContainer.remove();
+            };
+            editorContainer.appendChild(expandBtnContainer);
+        } else {
+            editorContainer.style.maxHeight = 'none';
+        }
+
         div.querySelector('.add-q-btn').onclick = () => { updateBlock(block.id, { questions: [...questions, { question: "Nouvelle question", options: ["A", "B"], correct: 0 }] }); renderContent(); };
     } else {
         div.className = 'my-6';
         if (questions.length === 0) { div.innerHTML = '<div class="p-4 bg-slate-800 rounded text-slate-500 text-xs">Quiz vide.</div>'; return div; }
 
         const btn = document.createElement('button');
-        btn.className = 'w-full py-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex items-center justify-center gap-3 transition-all group';
+        btn.className = 'w-full py-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex items-center justify-between transition-all group px-3';
+
         btn.innerHTML = `
-            <div class="p-2 bg-indigo-500/20 rounded-lg text-indigo-400 group-hover:text-indigo-300 group-hover:scale-110 transition-transform">
-                <i data-lucide="brain" class="w-6 h-6"></i>
-            </div>
-            <div class="text-left">
-                <h3 class="text-slate-200 font-bold text-sm">Lancer le Quiz</h3>
-                <p class="text-slate-500 text-xs">${questions.length} questions</p>
-            </div>
-            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-600 group-hover:text-slate-400 ml-auto mr-4"></i>
-        `;
+    <div class="flex items-center gap-3">
+        <div class="p-3 bg-indigo-500/20 rounded-lg text-indigo-400 group-hover:text-indigo-300 group-hover:scale-110 transition-transform">
+            <i data-lucide="brain" class="w-6 h-6"></i>
+        </div>
+
+        <div class="text-left">
+            <h3 class="text-slate-200 font-bold text-sm">Lancer le Quiz</h3>
+            <p class="text-slate-500 text-xs">${questions.length} questions</p>
+        </div>
+    </div>
+
+    <i data-lucide="chevron-right" class="w-5 h-5 text-slate-600 group-hover:text-slate-400"></i>
+`;
         btn.onclick = () => startQuizSession(questions, block.id);
         div.appendChild(btn);
     }
@@ -999,6 +1027,10 @@ function renderFlashcardBlock(block) {
         };
 
         const list = div.querySelector(`#fc-list-${block.id}`);
+        // Limit height and add scroll
+        list.className = "mt-4 space-y-2 relative overflow-hidden transition-all duration-300 ease-in-out";
+        list.style.maxHeight = "400px";
+
         cards.forEach((c, i) => {
             const row = document.createElement('div');
             row.className = 'flex gap-2 p-2 bg-slate-800 rounded border border-slate-700 items-center';
@@ -1013,23 +1045,48 @@ function renderFlashcardBlock(block) {
             row.querySelector('.del-fc').onclick = () => { const newCards = cards.filter((_, idx) => idx !== i); updateBlock(block.id, newCards); renderContent(); };
             list.appendChild(row);
         });
+
+        // Check if content is long enough to need a "Show More" button
+        if (cards.length > 5) { // Approximate check
+            const expandBtnContainer = document.createElement('div');
+            expandBtnContainer.className = 'absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#1e1e1e] to-transparent flex items-end justify-center pb-2 z-10';
+            expandBtnContainer.innerHTML = `
+                <button class="flex items-center gap-2 px-4 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-full shadow-lg transition-all">
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i> Voir tout le contenu
+                </button>
+            `;
+            expandBtnContainer.querySelector('button').onclick = () => {
+                list.style.maxHeight = 'none';
+                expandBtnContainer.remove();
+            };
+            list.appendChild(expandBtnContainer);
+        } else {
+            list.style.maxHeight = 'none';
+        }
+
         div.querySelector('.add-fc-btn').onclick = () => { updateBlock(block.id, [...cards, { question: "Nouvelle carte", answer: "Réponse" }]); renderContent(); };
     } else {
         div.className = 'my-6';
         if (cards.length === 0) { div.innerHTML = '<div class="text-center p-10 text-slate-500">Aucune flashcard.</div>'; return div; }
 
         const btn = document.createElement('button');
-        btn.className = 'w-full py-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex items-center justify-center gap-3 transition-all group';
+        btn.className = 'w-full py-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl flex items-center justify-between transition-all group px-3';
+
         btn.innerHTML = `
-            <div class="p-2 bg-indigo-500/20 rounded-lg text-indigo-400 group-hover:text-indigo-300 group-hover:scale-110 transition-transform">
-                <i data-lucide="layers" class="w-6 h-6"></i>
-            </div>
-            <div class="text-left">
-                <h3 class="text-slate-200 font-bold text-sm">Lancer les Flashcards</h3>
-                <p class="text-slate-500 text-xs">${cards.length} cartes</p>
-            </div>
-            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-600 group-hover:text-slate-400 ml-auto mr-4"></i>
-        `;
+    <div class="flex items-center gap-3">
+        <div class="p-3 bg-indigo-500/20 rounded-lg text-indigo-400 group-hover:text-indigo-300 group-hover:scale-110 transition-transform">
+            <i data-lucide="layers" class="w-6 h-6"></i>
+        </div>
+
+        <div class="text-left">
+            <h3 class="text-slate-200 font-bold text-sm">Lancer les Flashcards</h3>
+            <p class="text-slate-500 text-xs">${cards.length} cartes</p>
+        </div>
+    </div>
+
+    <i data-lucide="chevron-right" class="w-5 h-5 text-slate-600 group-hover:text-slate-400"></i>
+`;
+
         btn.onclick = () => startFlashcardSession(cards, block.id);
         div.appendChild(btn);
     }
