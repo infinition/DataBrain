@@ -1,0 +1,402 @@
+[
+  {
+    "id": "f1",
+    "title": "ML-PRO",
+    "isOpen": true,
+    "modules": [
+      {
+        "id": "p71nvmdfj",
+        "title": "Module 1 - Les 6 piliers de l'IA",
+        "icon": "📘",
+        "isOpen": true,
+        "chapters": [
+          {
+            "id": "6vjfdhqph",
+            "title": "BONUS - Hacker Votre Apprentissage",
+            "isOpen": true,
+            "subChapters": [
+              {
+                "id": "eukr2s62a",
+                "title": "1 - 🚀 Comment Hacker Votre Apprentissage",
+                "type": "folder",
+                "isCompleted": false,
+                "isOpen": true,
+                "subChapters": [
+                  {
+                    "id": "q000v2kyb",
+                    "title": "Introduction",
+                    "type": "page",
+                    "isCompleted": false,
+                    "isOpen": true,
+                    "subChapters": [],
+                    "blocks": [],
+                    "flashcards": [],
+                    "blocksLoaded": true
+                  }
+                ],
+                "blocks": [],
+                "flashcards": [],
+                "icon": "zap",
+                "colorizeIcon": false
+              },
+              {
+                "id": "b6qfada7v",
+                "title": "2 - 💡 Booster votre Mindset et votre Concentration",
+                "type": "folder",
+                "isCompleted": false,
+                "isOpen": true,
+                "subChapters": [
+                  {
+                    "id": "g3h8p2hfg",
+                    "title": "1 - La Capsule Emotionnelle",
+                    "type": "page",
+                    "isCompleted": false,
+                    "isOpen": true,
+                    "subChapters": [],
+                    "blocks": [],
+                    "flashcards": [],
+                    "blocksLoaded": true
+                  },
+                  {
+                    "id": "2e1y5i7j9",
+                    "title": "2 - La méthode du Pomodoro",
+                    "type": "page",
+                    "isCompleted": false,
+                    "isOpen": true,
+                    "subChapters": [],
+                    "blocks": [],
+                    "flashcards": [],
+                    "blocksLoaded": true
+                  }
+                ],
+                "blocks": [],
+                "flashcards": []
+              },
+              {
+                "id": "af4wpq7vg",
+                "title": "3 - 🧠 Les Méthodes d'Apprentissage",
+                "type": "folder",
+                "isCompleted": false,
+                "isOpen": true,
+                "subChapters": [
+                  {
+                    "id": "s6y46t7kw",
+                    "title": "1 - Ce que dit la science",
+                    "type": "page",
+                    "isCompleted": false,
+                    "isOpen": true,
+                    "subChapters": [],
+                    "blocks": [],
+                    "flashcards": [],
+                    "blocksLoaded": true
+                  },
+                  {
+                    "id": "7zxpknbv8",
+                    "title": "2 - La répétition espacée",
+                    "type": "page",
+                    "isCompleted": false,
+                    "isOpen": true,
+                    "subChapters": [],
+                    "blocks": [],
+                    "flashcards": [],
+                    "blocksLoaded": true
+                  },
+                  {
+                    "id": "ychkvcq1p",
+                    "title": "3 - L’apprentissage génératif",
+                    "type": "page",
+                    "isCompleted": false,
+                    "isOpen": true,
+                    "subChapters": [],
+                    "blocks": [],
+                    "flashcards": [],
+                    "blocksLoaded": true
+                  },
+                  {
+                    "id": "3heo2s9ha",
+                    "title": "4 - Le Feed-back immédiat",
+                    "type": "page",
+                    "isCompleted": false,
+                    "isOpen": true,
+                    "subChapters": [],
+                    "blocks": [],
+                    "flashcards": [],
+                    "blocksLoaded": true,
+                    "color": "#d62929",
+                    "icon": "user",
+                    "colorizeIcon": false
+                  },
+                  {
+                    "id": "p8rb16e7p",
+                    "title": "5 - Le Top Down - Bottom Up",
+                    "type": "page",
+                    "isCompleted": false,
+                    "isOpen": true,
+                    "subChapters": [],
+                    "blocks": [],
+                    "flashcards": [],
+                    "blocksLoaded": true
+                  },
+                  {
+                    "id": "t2u5o6l5s",
+                    "title": "6 - La méthode T.R.A.I.N",
+                    "type": "page",
+                    "isCompleted": false,
+                    "isOpen": true,
+                    "subChapters": [],
+                    "blocks": [],
+                    "flashcards": [],
+                    "blocksLoaded": true
+                  }
+                ],
+                "blocks": [],
+                "flashcards": []
+              },
+              {
+                "id": "uopp8c6g4",
+                "title": "4 - 🧩 Booster votre mémoire",
+                "type": "folder",
+                "isCompleted": false,
+                "isOpen": true,
+                "subChapters": [
+                  {
+                    "id": "xf3fs9a1x",
+                    "title": "1 - Mémoire de Travail et Mémoire Long Terme",
+                    "type": "page",
+                    "isCompleted": false,
+                    "isOpen": true,
+                    "subChapters": [],
+                    "blocks": [],
+                    "flashcards": [],
+                    "blocksLoaded": true
+                  },
+                  {
+                    "id": "96ucw8zta",
+                    "title": "2 - Le Dual N Back",
+                    "type": "page",
+                    "isCompleted": false,
+                    "isOpen": true,
+                    "subChapters": [],
+                    "blocks": [],
+                    "flashcards": [],
+                    "blocksLoaded": true
+                  },
+                  {
+                    "id": "nrhxpj3qj",
+                    "title": "3 - Les MindMaps",
+                    "type": "page",
+                    "isCompleted": false,
+                    "isOpen": true,
+                    "subChapters": [],
+                    "blocks": [],
+                    "flashcards": [],
+                    "blocksLoaded": true
+                  }
+                ],
+                "blocks": [],
+                "flashcards": []
+              }
+            ]
+          },
+          {
+            "id": "6su7crziz",
+            "title": "Cours 1 - Prise en main de sa machine",
+            "isOpen": true,
+            "subChapters": []
+          },
+          {
+            "id": "03tf5ievq",
+            "title": "Cours 2 - Les frameworks de la data science",
+            "isOpen": false,
+            "subChapters": []
+          },
+          {
+            "id": "kecaxguru",
+            "title": "Cours 3 - Git",
+            "isOpen": false,
+            "subChapters": []
+          },
+          {
+            "id": "yusb8p8iz",
+            "title": "Cours 4 - SQL",
+            "isOpen": false,
+            "subChapters": []
+          },
+          {
+            "id": "dvz3mpmlt",
+            "title": "Cours 5 - Méthodologie de l'IA",
+            "isOpen": true,
+            "subChapters": [
+              {
+                "id": "sho21vwki",
+                "title": "Introduction",
+                "type": "folder",
+                "isCompleted": false,
+                "isOpen": true,
+                "subChapters": [
+                  {
+                    "id": "n66ddcy0k",
+                    "title": "Introduction",
+                    "type": "page",
+                    "isCompleted": false,
+                    "isOpen": true,
+                    "subChapters": [],
+                    "blocks": [],
+                    "flashcards": [],
+                    "blocksLoaded": true
+                  }
+                ],
+                "blocks": [],
+                "flashcards": []
+              },
+              {
+                "id": "ry88ev9nk",
+                "title": "Le B.A.-BA de l'Analyse de données",
+                "type": "folder",
+                "isCompleted": false,
+                "isOpen": true,
+                "subChapters": [],
+                "blocks": [],
+                "flashcards": []
+              },
+              {
+                "id": "yxsfqkfst",
+                "title": "Formuler et tester des hypothèses",
+                "type": "folder",
+                "isCompleted": false,
+                "isOpen": false,
+                "subChapters": [],
+                "blocks": [],
+                "flashcards": []
+              },
+              {
+                "id": "9ozw18dva",
+                "title": "Comment développer des modeles",
+                "type": "folder",
+                "isCompleted": false,
+                "isOpen": true,
+                "subChapters": [],
+                "blocks": [],
+                "flashcards": []
+              },
+              {
+                "id": "yadnsf61w",
+                "title": "Preprocessing",
+                "type": "folder",
+                "isCompleted": false,
+                "isOpen": true,
+                "subChapters": [],
+                "blocks": [],
+                "flashcards": []
+              },
+              {
+                "id": "6m33c36op",
+                "title": "Modelisation",
+                "type": "folder",
+                "isCompleted": false,
+                "isOpen": true,
+                "subChapters": [],
+                "blocks": [],
+                "flashcards": []
+              },
+              {
+                "id": "djupvr6id",
+                "title": "Evaluation",
+                "type": "folder",
+                "isCompleted": false,
+                "isOpen": true,
+                "subChapters": [],
+                "blocks": [],
+                "flashcards": []
+              },
+              {
+                "id": "vxd76cv3v",
+                "title": "Vos 2 premiers projets de Machine Learning",
+                "type": "folder",
+                "isCompleted": false,
+                "isOpen": false,
+                "subChapters": [],
+                "blocks": [],
+                "flashcards": []
+              }
+            ]
+          },
+          {
+            "id": "9lvijf3j7",
+            "title": "Cours 6 - Programme d'entrainement Python",
+            "isOpen": true,
+            "subChapters": []
+          }
+        ],
+        "colorizeIcon": false
+      },
+      {
+        "id": "kkljalzi4",
+        "title": "Module 2 - Mathématiques",
+        "icon": "➗",
+        "isOpen": true,
+        "chapters": [],
+        "colorizeIcon": false
+      },
+      {
+        "id": "lti797yqa",
+        "title": "Module 3 - Machine Learning",
+        "icon": "🤖",
+        "isOpen": true,
+        "chapters": [],
+        "colorizeIcon": false
+      },
+      {
+        "id": "p4nxpyk9k",
+        "title": "Module 4 - Deep Learning",
+        "icon": "🧠",
+        "isOpen": true,
+        "chapters": [],
+        "colorizeIcon": false
+      },
+      {
+        "id": "iobmot4am",
+        "title": "Module 5 - Méthodologie et gestion de projet",
+        "icon": "📝",
+        "isOpen": true,
+        "chapters": [],
+        "colorizeIcon": false
+      },
+      {
+        "id": "ki53oz3h6",
+        "title": "Module 6 - Cloud",
+        "icon": "☁️",
+        "isOpen": true,
+        "chapters": [],
+        "colorizeIcon": false
+      },
+      {
+        "id": "4lrtk1m62",
+        "title": " Module 7 - Data Engineer",
+        "icon": "database",
+        "isOpen": true,
+        "chapters": [],
+        "colorizeIcon": false
+      },
+      {
+        "id": "5a13otnhw",
+        "title": "Module 8 - Apprentissage par renforcement",
+        "icon": "🏆",
+        "isOpen": true,
+        "chapters": [],
+        "colorizeIcon": false
+      },
+      {
+        "id": "wwunpuric",
+        "title": "Module 9 -  IA Générative",
+        "icon": "🎨",
+        "isOpen": false,
+        "chapters": [],
+        "colorizeIcon": false
+      }
+    ],
+    "color": "#2e8915",
+    "icon": "activity",
+    "colorizeIcon": true
+  }
+]

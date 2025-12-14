@@ -195,14 +195,20 @@ function setupEventListeners() {
     });
 }
 
-function handleFiles(files) {
-    files.forEach(file => {
+async function handleFiles(files) {
+    for (const file of files) {
         if (file.type.startsWith('image/')) {
-            const url = URL.createObjectURL(file);
-            addBlock('image', { src: url, caption: file.name });
+            const uploadResult = await Persistence.uploadFile(file);
+            const src = uploadResult ? uploadResult.path : URL.createObjectURL(file);
+            addBlock('image', { src: src, caption: file.name });
         } else if (file.type.startsWith('video/')) {
-            const url = URL.createObjectURL(file);
-            addBlock('video', { title: file.name, src: url });
+            const uploadResult = await Persistence.uploadFile(file);
+            const src = uploadResult ? uploadResult.path : URL.createObjectURL(file);
+            addBlock('video', { title: file.name, src: src });
+        } else if (file.type.startsWith('audio/')) {
+            const uploadResult = await Persistence.uploadFile(file);
+            const src = uploadResult ? uploadResult.path : URL.createObjectURL(file);
+            addBlock('audio', { title: file.name, src: src });
         } else if (file.type === 'application/json' || file.name.endsWith('.json')) {
             const reader = new FileReader();
             reader.onload = (ev) => {
@@ -256,5 +262,5 @@ function handleFiles(files) {
             };
             reader.readAsText(file);
         }
-    });
+    }
 }

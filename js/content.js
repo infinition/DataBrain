@@ -81,7 +81,25 @@ function renderContent() {
     // Always render learnView
     learnView.classList.remove('hidden');
 
-    renderBlocks(activeItem.blocks || []);
+    // Lazy Load Content if needed
+    if (!activeItem.blocksLoaded && typeof Persistence !== 'undefined' && Persistence.loadContent) {
+        // Show loading state
+        learnView.innerHTML = `
+            <div class="flex flex-col items-center justify-center h-64 text-slate-500">
+                <i data-lucide="loader-2" class="w-8 h-8 mb-4 animate-spin"></i>
+                <p>Chargement du contenu...</p>
+            </div>
+        `;
+        lucide.createIcons();
+
+        Persistence.loadContent(activeItem.id).then(blocks => {
+            activeItem.blocks = blocks;
+            activeItem.blocksLoaded = true;
+            renderBlocks(activeItem.blocks || []);
+        });
+    } else {
+        renderBlocks(activeItem.blocks || []);
+    }
 
     // Update Edit Mode Button State
     const importBtn = document.getElementById('import-btn');

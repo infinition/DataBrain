@@ -24,10 +24,11 @@ function renderSidebar() {
         formHeader.className = 'flex items-center justify-between px-2 py-1 text-indigo-400 hover:text-indigo-300 group mb-2';
 
         // Icon Logic
+        let iconStyle = (formation.colorizeIcon && formation.color) ? `style="color: ${formation.color}"` : '';
         let iconHtml = `<i data-lucide="${formation.isOpen ? 'chevron-down' : 'chevron-right'}" class="w-4 h-4 flex-shrink-0"></i>`;
         if (formation.icon) {
             if (formation.icon.length > 2) { // Lucide icon name
-                iconHtml += `<i data-lucide="${formation.icon}" class="w-4 h-4 ml-2"></i>`;
+                iconHtml += `<i data-lucide="${formation.icon}" class="w-4 h-4 ml-2" ${iconStyle}></i>`;
             } else { // Emoji
                 iconHtml += `<span class="ml-2 text-sm">${formation.icon}</span>`;
             }
@@ -64,10 +65,11 @@ function renderSidebar() {
                 modHeader.className = 'flex items-center justify-between px-2 py-1 text-slate-400 hover:text-white group';
 
                 // Icon Logic
+                let iconStyle = (module.colorizeIcon && module.color) ? `style="color: ${module.color}"` : '';
                 let iconHtml = `<i data-lucide="${module.isOpen ? 'chevron-down' : 'chevron-right'}" class="w-3.5 h-3.5"></i>`;
                 if (module.icon) {
                     if (module.icon.length > 2) { // Lucide icon name
-                        iconHtml += `<i data-lucide="${module.icon}" class="w-3.5 h-3.5 ml-1"></i>`;
+                        iconHtml += `<i data-lucide="${module.icon}" class="w-3.5 h-3.5 ml-1" ${iconStyle}></i>`;
                     } else { // Emoji
                         iconHtml += `<span class="ml-1 text-sm">${module.icon}</span>`;
                     }
@@ -103,10 +105,11 @@ function renderSidebar() {
                         chapHeader.className = 'flex items-center justify-between px-2 py-1 text-slate-400 hover:text-white group text-sm';
 
                         // Icon Logic
-                        let chapIconHtml = `<i data-lucide="${chapter.isOpen ? 'book-open' : 'book'}" class="w-3 h-3"></i>`;
+                        let iconStyle = (chapter.colorizeIcon && chapter.color) ? `style="color: ${chapter.color}"` : '';
+                        let chapIconHtml = `<i data-lucide="${chapter.isOpen ? 'book-open' : 'book'}" class="w-3 h-3" ${iconStyle}></i>`;
                         if (chapter.icon) {
                             if (chapter.icon.length > 2) {
-                                chapIconHtml = `<i data-lucide="${chapter.icon}" class="w-3 h-3"></i>`;
+                                chapIconHtml = `<i data-lucide="${chapter.icon}" class="w-3 h-3" ${iconStyle}></i>`;
                             } else {
                                 chapIconHtml = `<span class="text-xs">${chapter.icon}</span>`;
                             }
@@ -178,11 +181,12 @@ function renderSubChaptersRecursive(subChapters, container, formId, modId, chapI
             iconColorClass = 'text-green-400';
         }
 
-        let iconHtml = `<i data-lucide="${iconName}" class="w-3 h-3 ${iconColorClass}"></i>`;
+        let iconStyle = (sub.colorizeIcon && sub.color) ? `style="color: ${sub.color}"` : '';
+        let iconHtml = `<i data-lucide="${iconName}" class="w-3 h-3 ${iconColorClass}" ${iconStyle}></i>`;
 
         if (sub.icon) {
             if (sub.icon.length > 2) {
-                iconHtml = `<i data-lucide="${sub.icon}" class="w-3 h-3 ${iconColorClass}"></i>`;
+                iconHtml = `<i data-lucide="${sub.icon}" class="w-3 h-3 ${iconColorClass}" ${iconStyle}></i>`;
             } else {
                 iconHtml = `<span class="text-xs w-3 text-center inline-block">${sub.icon}</span>`;
             }

@@ -16,11 +16,27 @@ function renderVideoBlock(block) {
                     </div>
                 </div>
                 <input type="text" class="video-title-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="Titre de la vidéo" value="${block.content.title}">
-                <input type="text" class="video-src-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="URL de la vidéo" value="${block.content.src}">
+                <div class="flex gap-2">
+                    <input type="text" class="video-src-input flex-1 bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="URL de la vidéo" value="${block.content.src}">
+                    <button class="upload-btn bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded text-sm transition-colors" title="Uploader un fichier"><i data-lucide="upload" class="w-4 h-4"></i></button>
+                    <input type="file" class="hidden-file-input hidden" accept="video/*">
+                </div>
             </div>
         `;
         div.querySelector('.video-title-input').oninput = (e) => updateBlock(block.id, { ...block.content, title: e.target.value }, true);
         div.querySelector('.video-src-input').oninput = (e) => updateBlock(block.id, { ...block.content, src: e.target.value }, true);
+
+        const fileInput = div.querySelector('.hidden-file-input');
+        div.querySelector('.upload-btn').onclick = () => fileInput.click();
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const result = await Persistence.uploadFile(file);
+                if (result) {
+                    updateBlock(block.id, { ...block.content, src: result.path });
+                }
+            }
+        };
         div.querySelectorAll('.align-btn').forEach(btn => {
             btn.onclick = () => { updateBlock(block.id, { ...block.content, align: btn.dataset.align }); };
         });
@@ -86,12 +102,28 @@ function renderImageBlock(block) {
                         <button class="align-btn p-1 rounded hover:bg-slate-700 ${align === 'right' ? 'bg-indigo-600 text-white' : 'text-slate-400'}" data-align="right" title="Aligner à droite"><i data-lucide="align-right" class="w-4 h-4"></i></button>
                     </div>
                 </div>
-                <input type="text" class="img-src-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm" placeholder="URL de l'image" value="${block.content.src}">
+                <div class="flex gap-2">
+                    <input type="text" class="img-src-input flex-1 bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm" placeholder="URL de l'image" value="${block.content.src}">
+                    <button class="upload-btn bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded text-sm transition-colors" title="Uploader un fichier"><i data-lucide="upload" class="w-4 h-4"></i></button>
+                    <input type="file" class="hidden-file-input hidden" accept="image/*">
+                </div>
                 <input type="text" class="img-cap-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm" placeholder="Légende" value="${block.content.caption}">
             </div>
         `;
         div.querySelector('.img-src-input').oninput = (e) => updateBlock(block.id, { ...block.content, src: e.target.value }, true);
         div.querySelector('.img-cap-input').oninput = (e) => updateBlock(block.id, { ...block.content, caption: e.target.value }, true);
+
+        const fileInput = div.querySelector('.hidden-file-input');
+        div.querySelector('.upload-btn').onclick = () => fileInput.click();
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const result = await Persistence.uploadFile(file);
+                if (result) {
+                    updateBlock(block.id, { ...block.content, src: result.path });
+                }
+            }
+        };
         div.querySelectorAll('.align-btn').forEach(btn => {
             btn.onclick = () => { updateBlock(block.id, { ...block.content, align: btn.dataset.align }); };
         });
@@ -139,14 +171,13 @@ function renderAudioBlock(block) {
 
         const fileInput = div.querySelector('.hidden-file-input');
         div.querySelector('.upload-btn').onclick = () => fileInput.click();
-        fileInput.onchange = (e) => {
+        fileInput.onchange = async (e) => {
             const file = e.target.files[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    updateBlock(block.id, { ...block.content, src: ev.target.result });
-                };
-                reader.readAsDataURL(file);
+                const result = await Persistence.uploadFile(file);
+                if (result) {
+                    updateBlock(block.id, { ...block.content, src: result.path });
+                }
             }
         };
 
@@ -197,7 +228,11 @@ function renderEmbedBlock(block) {
                     </select>
                 </div>
                 <input type="text" class="embed-title-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="Titre du fichier" value="${content.title || ''}">
-                <input type="text" class="embed-src-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="URL du fichier ou lien embed" value="${content.src || ''}">
+                <div class="flex gap-2">
+                    <input type="text" class="embed-src-input flex-1 bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="URL du fichier ou lien embed" value="${content.src || ''}">
+                    <button class="upload-btn bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded text-sm transition-colors" title="Uploader un fichier"><i data-lucide="upload" class="w-4 h-4"></i></button>
+                    <input type="file" class="hidden-file-input hidden" accept=".pdf,.csv,.epub,.html,.txt">
+                </div>
                 <p class="text-[10px] text-slate-500">Supporte : PDF, Google Docs, Office Online, CSV, EPUB, etc.</p>
             </div>
         `;
@@ -205,6 +240,18 @@ function renderEmbedBlock(block) {
         div.querySelector('.embed-title-input').oninput = (e) => updateBlock(block.id, { ...content, title: e.target.value }, true);
         div.querySelector('.embed-src-input').oninput = (e) => updateBlock(block.id, { ...content, src: e.target.value }, true);
         div.querySelector('.type-select').onchange = (e) => updateBlock(block.id, { ...content, type: e.target.value });
+
+        const fileInput = div.querySelector('.hidden-file-input');
+        div.querySelector('.upload-btn').onclick = () => fileInput.click();
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const result = await Persistence.uploadFile(file);
+                if (result) {
+                    updateBlock(block.id, { ...content, src: result.path });
+                }
+            }
+        };
 
     } else {
         const src = content.src || '';
@@ -274,7 +321,7 @@ function renderEmbedContent(type, src) {
                 fetch(src)
                     .then(r => r.text())
                     .then(csvText => {
-                        const rows = csvText.trim().split('\\n').map(r => r.split(','));
+                        const rows = csvText.trim().split('\n').map(r => r.split(','));
                         const table = document.getElementById(csvId);
                         if (table && rows.length > 0) {
                             let html = '<thead class="bg-slate-800 text-slate-300 sticky top-0"><tr>';
@@ -319,16 +366,16 @@ function render3DBlock(block) {
                     </label>
                     <div class="flex items-center gap-2">
                         <label class="text-xs text-slate-400 flex items-center gap-1 cursor-pointer">
-                            <input type="checkbox" class="auto-rotate-check" ${content.autoRotate ? 'checked' : ''}>
+                            <input type="checkbox" class="auto-rotate-check" ${content.autoRotate ? 'checked' : ''} />
                             Auto-rotation par défaut
                         </label>
                     </div>
                 </div>
-                <input type="text" class="model-title-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="Titre du modèle" value="${content.title || ''}">
+                <input type="text" class="model-title-input bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="Titre du modèle" value="${content.title || ''}" />
                 <div class="flex gap-2">
-                    <input type="text" class="model-src-input flex-1 bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="URL du fichier .glb ou .gltf" value="${content.src || ''}">
+                    <input type="text" class="model-src-input flex-1 bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded text-sm outline-none focus:border-indigo-500" placeholder="URL du fichier .glb ou .gltf" value="${content.src || ''}" />
                     <button class="upload-btn bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded text-sm transition-colors" title="Uploader un fichier"><i data-lucide="upload" class="w-4 h-4"></i></button>
-                    <input type="file" class="hidden-file-input hidden" accept=".glb,.gltf">
+                    <input type="file" class="hidden-file-input hidden" accept=".glb,.gltf" />
                 </div>
                 <p class="text-[10px] text-slate-500">Formats supportés : .glb, .gltf. Utilisez des liens directs (ex: raw github, cdn).</p>
             </div>
@@ -340,14 +387,13 @@ function render3DBlock(block) {
 
         const fileInput = div.querySelector('.hidden-file-input');
         div.querySelector('.upload-btn').onclick = () => fileInput.click();
-        fileInput.onchange = (e) => {
+        fileInput.onchange = async (e) => {
             const file = e.target.files[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    updateBlock(block.id, { ...content, src: ev.target.result });
-                };
-                reader.readAsDataURL(file);
+                const result = await Persistence.uploadFile(file);
+                if (result) {
+                    updateBlock(block.id, { ...content, src: result.path });
+                }
             }
         };
 

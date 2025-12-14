@@ -96,6 +96,11 @@
                     <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> <span id="edit-mode-text"
                         class="hidden sm:inline">Lecture</span>
                 </button>
+                <button id="settings-btn"
+                    class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-700 text-slate-400 text-xs font-medium hover:text-white hover:border-slate-500 transition-colors"
+                    title="Paramètres">
+                    <i data-lucide="settings" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Settings</span>
+                </button>
             </div>
         </header>
 
@@ -109,6 +114,8 @@
         </div>
 
     </div>
+
+    <!-- Customization Modal -->
     <div id="customization-modal"
         class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-[#1e1e2e] border border-slate-700 rounded-xl w-96 shadow-2xl overflow-hidden m-4">
@@ -118,6 +125,14 @@
                         class="w-4 h-4"></i></button>
             </div>
             <div class="p-6 space-y-6">
+                <!-- Rename Section -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Renommer</label>
+                    <input type="text" id="rename-input"
+                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:border-indigo-500 outline-none"
+                        placeholder="Nom de l'élément">
+                </div>
+
                 <!-- Icon Section -->
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Icône</label>
@@ -144,19 +159,54 @@
 
                 <!-- Color Section -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Couleur du
-                        texte</label>
-                    <div class="flex items-center gap-3">
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Couleur</label>
+                    <div class="flex items-center gap-3 mb-2">
                         <input type="color" id="color-picker"
                             class="w-10 h-10 rounded cursor-pointer bg-transparent border-0 p-0" value="#ffffff">
                         <span id="color-value" class="text-xs text-slate-400 font-mono">#FFFFFF</span>
                         <button id="reset-color-btn"
                             class="text-xs text-slate-500 hover:text-white underline ml-auto">Réinitialiser</button>
                     </div>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="colorize-icon-checkbox"
+                            class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                        <label for="colorize-icon-checkbox" class="text-xs text-slate-400">Appliquer la couleur à
+                            l'icône</label>
+                    </div>
                 </div>
             </div>
-            <div class="p-4 border-t border-slate-700 bg-[#151520] flex justify-end">
+            <div class="p-4 border-t border-slate-700 bg-[#151520] flex justify-between items-center">
+                <button id="delete-item-btn"
+                    class="px-4 py-2 bg-red-900/50 hover:bg-red-900 text-red-200 text-sm rounded-lg font-medium transition-colors border border-red-800">Supprimer</button>
                 <button id="save-custom-btn"
+                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm rounded-lg font-medium transition-colors">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal"
+        class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-[#1e1e2e] border border-slate-700 rounded-xl w-96 shadow-2xl overflow-hidden m-4">
+            <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-[#151520]">
+                <h3 class="text-white font-bold text-sm">Paramètres</h3>
+                <button id="close-settings-modal" class="text-slate-400 hover:text-white"><i data-lucide="x"
+                        class="w-4 h-4"></i></button>
+            </div>
+            <div class="p-6 space-y-6">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Chemin de sauvegarde
+                        (Serveur/NAS)</label>
+                    <input type="text" id="storage-path-input"
+                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:border-indigo-500 outline-none"
+                        placeholder="Ex: D:/DataBrain/Backups">
+                    <p class="text-xs text-slate-500 mt-1">Laissez vide pour utiliser le dossier par défaut du serveur.
+                    </p>
+                </div>
+                <div id="settings-status" class="text-xs text-indigo-400 hidden"></div>
+            </div>
+            <div class="p-4 border-t border-slate-700 bg-[#151520] flex justify-end">
+                <button id="save-settings-btn"
                     class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm rounded-lg font-medium transition-colors">Enregistrer</button>
             </div>
         </div>
@@ -184,6 +234,7 @@
     <script src="js/content.js"></script>
     <script src="js/events.js"></script>
     <script src="js/interactive.js"></script>
+    <script src="js/persistence.js"></script>
     <script src="js/main.js"></script>
 </body>
 

@@ -42,6 +42,14 @@ function openCustomizationModal(dataset) {
     colorPicker.value = currentColor || '#000000';
     colorValue.textContent = currentColor || 'Défaut';
 
+    // Set Rename Input
+    const renameInput = document.getElementById('rename-input');
+    renameInput.value = item ? item.title : '';
+
+    // Set Colorize Icon Checkbox
+    const colorizeIconCheckbox = document.getElementById('colorize-icon-checkbox');
+    colorizeIconCheckbox.checked = item ? !!item.colorizeIcon : false;
+
     // Set Icon Tab
     // Simple heuristic: if it's a known lucide icon, show lucide tab, else emoji
     // For now default to Lucide tab
@@ -54,6 +62,8 @@ function saveCustomization() {
 
     const { type, id, formId, modId, chapId } = customizationTarget;
     const newColor = colorValue.textContent === 'Défaut' ? undefined : colorPicker.value;
+    const newTitle = document.getElementById('rename-input').value;
+    const colorizeIcon = document.getElementById('colorize-icon-checkbox').checked;
 
     // Determine selected icon
     let newIcon = undefined;
@@ -65,15 +75,24 @@ function saveCustomization() {
         if (emojiInput.value) newIcon = emojiInput.value;
     }
 
+    // Helper to update item properties
+    const updateItem = (item) => ({
+        ...item,
+        color: newColor,
+        icon: newIcon,
+        title: newTitle || item.title,
+        colorizeIcon: colorizeIcon
+    });
+
     // Update Data
     if (type === 'formation') {
-        formations = formations.map(f => f.id === id ? { ...f, color: newColor, icon: newIcon } : f);
+        formations = formations.map(f => f.id === id ? updateItem(f) : f);
     } else if (type === 'module') {
         formations = formations.map(f => {
             if (f.id !== formId) return f;
             return {
                 ...f,
-                modules: f.modules.map(m => m.id === id ? { ...m, color: newColor, icon: newIcon } : m)
+                modules: f.modules.map(m => m.id === id ? updateItem(m) : m)
             };
         });
     } else if (type === 'chapter') {
@@ -85,7 +104,7 @@ function saveCustomization() {
                     if (m.id !== modId) return m;
                     return {
                         ...m,
-                        chapters: m.chapters.map(c => c.id === id ? { ...c, color: newColor, icon: newIcon } : c)
+                        chapters: m.chapters.map(c => c.id === id ? updateItem(c) : c)
                     };
                 })
             };
@@ -93,7 +112,7 @@ function saveCustomization() {
     } else if (type === 'sub') {
         function updateSubRecursive(subs) {
             return subs.map(s => {
-                if (s.id === id) return { ...s, color: newColor, icon: newIcon };
+                if (s.id === id) return updateItem(s);
                 if (s.subChapters) return { ...s, subChapters: updateSubRecursive(s.subChapters) };
                 return s;
             });
@@ -112,11 +131,67 @@ function saveCustomization() {
 
     customModal.classList.add('hidden');
     renderSidebar();
+    // If we renamed the currently active item, we might want to refresh the breadcrumbs/header
+    // But for now, sidebar refresh is the most important.
+    // Also save to persistence
+    if (typeof saveFormations === 'function') saveFormations();
+}
+
+function deleteItem() {
+    if (!customizationTarget || !confirm("Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.")) return;
+
+    const { type, id, formId, modId, chapId } = customizationTarget;
+
+    if (type === 'formation') {
+        formations = formations.filter(f => f.id !== id);
+    } else if (type === 'module') {
+        formations = formations.map(f => {
+            if (f.id !== formId) return f;
+            return { ...f, modules: f.modules.filter(m => m.id !== id) };
+        });
+    } else if (type === 'chapter') {
+        formations = formations.map(f => {
+            if (f.id !== formId) return f;
+            return {
+                ...f,
+                modules: f.modules.map(m => {
+                    if (m.id !== modId) return m;
+                    return { ...m, chapters: m.chapters.filter(c => c.id !== id) };
+                })
+            };
+        });
+    } else if (type === 'sub') {
+        function deleteSubRecursive(subs) {
+            return subs.filter(s => s.id !== id).map(s => {
+                if (s.subChapters) return { ...s, subChapters: deleteSubRecursive(s.subChapters) };
+                return s;
+            });
+        }
+        formations = formations.map(f => ({
+            ...f,
+            modules: f.modules.map(m => ({
+                ...m,
+                chapters: m.chapters.map(c => ({
+                    ...c,
+                    subChapters: deleteSubRecursive(c.subChapters)
+                }))
+            }))
+        }));
+    }
+
+    customModal.classList.add('hidden');
+    renderSidebar();
+    // If deleted item was active, maybe redirect?
+    // For now simple sidebar refresh.
+    if (typeof saveFormations === 'function') saveFormations();
 }
 
 function setupCustomizationListeners() {
     closeCustomModalBtn.onclick = () => customModal.classList.add('hidden');
     saveCustomBtn.onclick = saveCustomization;
+
+    const deleteBtn = document.getElementById('delete-item-btn');
+    if (deleteBtn) deleteBtn.onclick = deleteItem;
 
     iconTabs.forEach(tab => {
         tab.onclick = () => {
